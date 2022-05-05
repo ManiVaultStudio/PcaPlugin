@@ -24,13 +24,15 @@ namespace math {
     template<class T>
     inline std::vector<T> convertEigenMatrixToStdVector(Eigen::Matrix<T, -1, -1> mat, bool followStorageOrder = true) {
 
+        const Eigen::StorageOptions StorageOrder = mat.IsRowMajor ? Eigen::RowMajor : Eigen::ColMajor;
+
         // by default Eigen uses column-major storage order
-        if (!followStorageOrder)
+        if (StorageOrder == Eigen::ColMajor)
         {
             mat.transposeInPlace();
         }
 
-        return { mat.transpose().data(), mat.data() + mat.size() };
+        return { mat.data(), mat.data() + mat.size() };
     }
 
     Eigen::MatrixXf convertStdVectorToEigenMatrix(const std::vector<float>& data_in, size_t num_dims)
@@ -247,7 +249,6 @@ namespace math {
         // compute 2 pca components and convert to std vector with [p0d0, p0d1, ..., p1d0, p1d1, ..., pNd0, pNd1, ..., pNdM]
         pca_out = convertEigenMatrixToStdVector(data_transformed);
     }
-
 
 
 }

@@ -22,7 +22,7 @@ PCAPlugin::PCAPlugin(const PluginFactory* factory) :
 void PCAPlugin::init()
 {
     // Create example output dataset (a points dataset which is derived from the input points dataset) and set the output dataset
-    setOutputDataset(_core->createDerivedDataset("Output Data", getInputDataset()));
+    setOutputDataset(_core->createDerivedDataset("PCA", getInputDataset()));
 
     // Retrieve the input dataset for our specific data type (in our case points)
     // The HDPS core sets the input dataset reference when the plugin is created
@@ -37,6 +37,7 @@ void PCAPlugin::init()
     // Inject the settings action in the output points dataset 
     // By doing so, the settings user interface will be accessible though the data properties widget
     outputDataset->addAction(_settingsAction);
+    outputDataset->addAction(_dimensionSelectionAction);
     
     // Add input dataset to the dimension selection action
     _dimensionSelectionAction.getPickerAction().setPointsDataset(inputDataset);
@@ -61,6 +62,16 @@ void PCAPlugin::onDataEvent(hdps::DataEvent* dataEvent)
         if (dataEvent->getDataset() == getInputDataset())
             _dimensionSelectionAction.getPickerAction().setPointsDataset(dataEvent->getDataset<Points>());
     }
+
+}
+
+template<class T>
+inline void printStdVector(const std::vector<T>& vec) {
+    for (auto& val : vec)
+    {
+        std::cout << val << " ";
+    }
+    std::cout << "\n";
 
 }
 
