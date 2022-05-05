@@ -34,10 +34,14 @@ ELSE()
 ENDIF()
 # don't use find_package (Eigen3 3.4 REQUIRED) for now since this requires more user setup
 
-IF( NOT DEFINED CATCH2_INCLUDE_DIR )
-    MESSAGE( FATAL_ERROR "Define CATCH2_INCLUDE_DIR, the directory of Catch2")
-ELSE()
-	MESSAGE( STATUS "Catch2 headers at ${CATCH2_INCLUDE_DIR}")
+if(DEFINED ENV{CATCH2_DIR})
+    set(CATCH2_DIR $ENV{CATCH2_DIR} CACHE PATH  "Path to HDILib_slim")
+endif()
+
+find_package(Catch2 3 REQUIRED PATH ${CATCH2_DIR})
+
+IF( ${Catch2_FOUND} )
+    MESSAGE( STATUS "Catch2 found at ${Catch2_DIR}")
 ENDIF()
 # don't use find_package (Catch2 3 REQUIRED) for now since this requires more user setup
 
@@ -55,7 +59,7 @@ source_group( Tests FILES ${SOURCES})
 # CMake Target
 # -----------------------------------------------------------------------------
 
-add_library(${PCA_TESTS} SHARED ${SOURCES})
+add_executable(${PCA_TESTS} ${SOURCES})
 
 # -----------------------------------------------------------------------------
 # Target include directories
@@ -66,7 +70,12 @@ target_include_directories(${PCA_TESTS} PRIVATE "${PCA_PLUGIN_DIR}/src")
 
 # Include external headers
 target_include_directories(${PCA_TESTS} PRIVATE "${EIGEN3_INCLUDE_DIR}")
-target_include_directories(${PCA_TESTS} PRIVATE "${CATCH2_INCLUDE_DIR}")
+
+# -----------------------------------------------------------------------------
+# Target link directories
+# -----------------------------------------------------------------------------
+# linking against catch will add the proper include path
+target_link_libraries(${PCA_TESTS} PRIVATE Catch2::Catch2WithMain)
 
 # -----------------------------------------------------------------------------
 # Target properties
