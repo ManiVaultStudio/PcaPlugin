@@ -111,3 +111,17 @@ add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
 	"$<TARGET_FILE:${PCA_PLUGIN}>"
 	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PCA_PLUGIN}>"
 )
+
+
+# -----------------------------------------------------------------------------
+# Unit testing
+# -----------------------------------------------------------------------------
+
+if(NOT UNIT_TESTS)
+    set(UNIT_TESTS FALSE CACHE BOOL "Create unit tests")
+endif()
+
+if(${UNIT_TESTS})
+	MESSAGE( STATUS "Activate unit tests")
+	add_subdirectory("test")
+endif()
