@@ -7,19 +7,26 @@ import os
 if not os.path.isdir('data'):
     os.mkdir('data')
 
+
+# define save function
+def saveAsBinary(dataToSave, filename, type=np.single):
+    dataToSave.astype(type).tofile(filename)
+    #with open(filename, 'wb') as f:
+    #    np.save(f, dataToSave.astype(type))
+
+
 # define data
-data = load_digits().data
+data = load_digits().data.astype(np.single)
 num_points, num_dims = data.shape
 
 print(f"Use sklearn digits dataset. \nNumber of points: {num_points} with {num_dims} dimensions each")
 print("Save data")
-with open('data/data', 'wb') as f:
-    np.save(f, data)
+saveAsBinary(data, 'data/data')
 
 # preprocessing: prep
 means = np.mean(data, axis=0)
-mins = np.max(data, axis=0)
-maxs = np.min(data, axis=0)
+mins = np.min(data, axis=0)
+maxs = np.max(data, axis=0)
 normFacs = maxs - mins
 
 # preprocessing: mean normalization
@@ -40,47 +47,29 @@ for col in range(num_dims):
 
 # Save data as binary to disk
 print("Save normalized data")
-with open('data/data_norm_minmax', 'wb') as f:
-    np.save(f, data_norm_mean)
-with open('data/data_norm_mean', 'wb') as f:
-    np.save(f, data_norm_minmax)
+saveAsBinary(data_norm_mean, 'data/data_norm_mean')
+saveAsBinary(data_norm_minmax, 'data/data_norm_minmax')
 
 # perform PCA for 2 and for all components
 print("Perform PCA and save to disk")
-for num_comps in [2, num_dims]:
-    print(f"Components: {num_comps}")
-    # PCA
-    pca_norm_mean = PCA(n_components=num_comps)
-    pca_norm_mean.fit(data_norm_mean)
 
-    pca_norm_minmax = PCA(n_components=num_comps)
-    pca_norm_minmax.fit(data_norm_minmax)
+settingsList = [[data, 'data/pca_raw', 'data/trans_raw'],
+                [data_norm_minmax, 'data/pca_norm_minmax', 'data/trans_norm_minmax'],
+                [data_norm_mean, 'data/pca_norm_mean', 'data/trans_norm_mean']]
 
-    # Save pca as binary to disk
-    with open(f'data/pca_norm_minmax_{num_comps}', 'wb') as f:
-        np.save(f, pca_norm_mean.components_)
-    with open(f'data/pca_norm_mean_{num_comps}', 'wb') as f:
-        np.save(f, pca_norm_minmax.components_)
+for dat, pca_save_path, trans_save_path in settingsList:
+    for num_comps in [2, num_dims]:
+        print(f"Components: {num_comps}")
+        # PCA
+        pca = PCA(n_components=num_comps, svd_solver='full')
+        pca.fit(dat)
 
-    # PCA on raw data
-    pca_raw = PCA(n_components=num_comps)
-    pca_raw.fit(data)
+        # Save pca as binary to disk
+        saveAsBinary(pca.components_, f'{pca_save_path}_{num_comps}')
 
-    # Save pca as binary to disk
-    with open(f'data/pca_raw_{num_comps}', 'wb') as f:
-        np.save(f, pca_raw.components_)
-
-    # Transform data
-    print("Transform...")
-    trans_norm_mean = np.matmul(data_norm_mean, pca_norm_mean.components_.T)
-    trans_norm_minmax = np.matmul(data_norm_minmax, pca_norm_minmax.components_.T)
-    trans_raw = np.matmul(data, pca_raw.components_.T)
-
-    with open(f'data/trans_norm_mean_{num_comps}', 'wb') as f:
-        np.save(f, trans_norm_mean)
-    with open(f'data/trans_norm_minmax_{num_comps}', 'wb') as f:
-        np.save(f, trans_norm_minmax)
-    with open(f'data/trans_raw_{num_comps}', 'wb') as f:
-        np.save(f, trans_raw)
+        # Transform data
+        print("Transform...")
+        trans = np.matmul(dat, pca.components_.T)
+        saveAsBinary(trans, f'{trans_save_path}_{num_comps}')
 
 print("Done.")
