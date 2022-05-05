@@ -1,11 +1,10 @@
 # PCA Plugin
 
-Eigen.
+Performs a [principal components analysis](https://en.wikipedia.org/wiki/Principal_component_analysis).
 
-TODO:
+## Dependencies
 
-Fix bugs
+- Eigen 3.4: Download the header-only library [Eigen](https://gitlab.com/libeigen/eigen) and pass the top level directory of your local copy as `EIGEN3_INCLUDE_DIR` to cmake.
 
-Dimensionpicker in own file
-
-Add catch2 unit testing (check against pca computed in python with some random data)
+## TODO
+- Add catch2 unit testing (check against pca computed in python with some random data)
