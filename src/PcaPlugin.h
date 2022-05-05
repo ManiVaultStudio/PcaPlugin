@@ -3,6 +3,7 @@
 #include <AnalysisPlugin.h>
 
 #include "SettingsAction.h"
+#include "DimensionSelectionAction.h"
 
 #include "graphics/Vector2f.h"
 
@@ -53,8 +54,8 @@ private:
     void setPCADataInCore(std::vector<float>& data, size_t num_components);
 
 private:
-    SettingsAction      _settingsAction;    /** The place where settings are stored (more info in SettingsAction.h) */
-    
+    SettingsAction              _settingsAction;            /** General PCA settings */
+    DimensionSelectionAction    _dimensionSelectionAction;  /** Dimension selection */
 };
 
 /**

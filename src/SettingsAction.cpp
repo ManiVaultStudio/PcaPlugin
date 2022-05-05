@@ -1,24 +1,11 @@
 #include "SettingsAction.h"
 
-// //////////////////////// //
-// DimensionSelectionAction //
-// //////////////////////// //
-DimensionSelectionAction::DimensionSelectionAction(QObject* parent) :
-    GroupAction(parent, true),
-    _pickerAction(this)
-{
-    setText("Dimensions");
-}
 
-// ////////////// //
-// SettingsAction //
-// ////////////// //
 SettingsAction::SettingsAction(QObject* parent) :
     GroupAction(parent, true),
     _pcaAlgorithmAction(this, "PCA alg"),
     _numberOfComponents(this, "Number of iterations"),
-    _startAnalysisAction(this, "Start analysis"),
-    _dimensionSelectionAction(this)
+    _startAnalysisAction(this, "Start analysis")
 {
     setText("PCA");
 

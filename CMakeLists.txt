@@ -59,6 +59,8 @@ set(SOURCES
     src/PcaPlugin.json
 	src/PCA.h
 	src/Utils.h
+	src/DimensionSelectionAction.h
+	src/DimensionSelectionAction.cpp
 )
 
 source_group( Plugin FILES ${SOURCES})

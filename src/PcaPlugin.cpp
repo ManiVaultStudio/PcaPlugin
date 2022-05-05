@@ -14,7 +14,8 @@ using namespace hdps::plugin;
 
 PCAPlugin::PCAPlugin(const PluginFactory* factory) :
     AnalysisPlugin(factory),
-    _settingsAction()
+    _settingsAction(this),
+    _dimensionSelectionAction(this)
 {
 }
 
@@ -38,7 +39,7 @@ void PCAPlugin::init()
     outputDataset->addAction(_settingsAction);
     
     // Add input dataset to the dimension selection action
-    _settingsAction.getDimensionSelectionAction().getPickerAction().setPointsDataset(inputDataset);
+    _dimensionSelectionAction.getPickerAction().setPointsDataset(inputDataset);
 
     // Automatically focus on the PCA action
     outputDataset->getDataHierarchyItem().select();
@@ -58,7 +59,7 @@ void PCAPlugin::onDataEvent(hdps::DataEvent* dataEvent)
     if (dataEvent->getType() == EventType::DataChanged)
     {
         if (dataEvent->getDataset() == getInputDataset())
-            _settingsAction.getDimensionSelectionAction().getPickerAction().setPointsDataset(dataEvent->getDataset<Points>());
+            _dimensionSelectionAction.getPickerAction().setPointsDataset(dataEvent->getDataset<Points>());
     }
 
 }
@@ -103,7 +104,7 @@ void PCAPlugin::getDataFromCore(std::vector<float>& data, std::vector<unsigned i
     auto inputPoints = getInputDataset<Points>();
 
     // Extract the enabled dimensions from the data
-    std::vector<bool> enabledDimensions = _settingsAction.getDimensionSelectionAction().getPickerAction().getEnabledDimensions();
+    std::vector<bool> enabledDimensions = _dimensionSelectionAction.getPickerAction().getEnabledDimensions();
 
     const auto numEnabledDimensions = count_if(enabledDimensions.begin(), enabledDimensions.end(), [](bool b) { return b; });
 
