@@ -79,4 +79,45 @@ for dat, pca_save_path, trans_save_path in settingsList:
         trans = np.matmul(dat, pca.components_.T)
         saveAsBinary(trans, f'{trans_save_path}_{num_comps}')
 
+
+#######
+# sklearn example
+# https://scikit-learn.org/1.1/modules/generated/sklearn.decomposition.PCA.html
+#######
+print("sklearn example")
+X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]], dtype=float)
+
+# preprocessing: prep
+X_means = np.mean(X, axis=0)
+X_mins = np.min(X, axis=0)
+X_maxs = np.max(X, axis=0)
+X_normFacs = X_maxs - X_mins
+
+# preprocessing: mean normalization
+X_norm_mean = X.copy()
+X_norm_mean -= X_means
+
+# preprocessing: min-max normalization
+X_norm_minmax = X.copy()
+X_norm_minmax -= X_mins
+
+saveAsBinary(X, 'data/sklearn_data')
+saveAsBinary(X_norm_mean, 'data/sklearn_data_norm_mean')
+saveAsBinary(X_norm_minmax, 'data/sklearn_data_norm_minmax')
+
+pca = PCA(n_components=2)
+pca.fit(X)
+saveAsBinary(pca.components_, f'data/sklearn_pca')
+saveAsBinary(pca.transform(X), f'data/sklearn_trans')
+
+pca = PCA(n_components=2)
+pca.fit(X_norm_mean)
+saveAsBinary(pca.components_, f'data/sklearn_pca_norm_mean')
+saveAsBinary(pca.transform(X_norm_mean), f'data/sklearn_trans_norm_mean')
+
+pca = PCA(n_components=2)
+pca.fit(X_norm_minmax)
+saveAsBinary(pca.components_, f'data/sklearn_pca_norm_minmax')
+saveAsBinary(pca.transform(X_norm_minmax), f'data/sklearn_trans_norm_minmax')
+
 print("Done.")

@@ -179,7 +179,7 @@ namespace math {
         // this is equivalent to:
         // Eigen::MatrixXf v = svd.matrixV();
         // Eigen::MatrixXf v_comps = v(Eigen::all, Eigen::seq(0, num_comp - 1));
-        // return data * v_comps;
+        // return v_comps;
         return svd.matrixV()(Eigen::all, Eigen::seq(0, num_comp - 1));
 
     }
@@ -216,12 +216,18 @@ namespace math {
         return data * principal_components;
     }
 
+    enum class DATA_NORM {
+        NONE,      // no norm 
+        MEAN,      // meanNormalization
+        MINMAX,    // minMaxNormalization, map each column to [0,1]
+    };
+
     enum class PCA_ALG {
         SVD,    // Use singular value decomposition, Eigen::BDCSVD
         COV,    // Compute eigenvalues of covariance matrix of data, Eigen::SelfAdjointEigenSolver
     };
 
-    inline void pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, PCA_ALG algorithm = PCA_ALG::SVD)
+    inline void pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, PCA_ALG algorithm = PCA_ALG::SVD, DATA_NORM norm = DATA_NORM::MINMAX)
     {
         // convert HsneMatrix to Eigen MatrixXf
         Eigen::MatrixXf data = convertStdVectorToEigenMatrix(data_in, num_dims);
@@ -229,10 +235,17 @@ namespace math {
         assert(data.rows() * data.cols() == data_in.size());
         assert(data.cols() == num_dims);
 
-        // prep data: min-max normalization
-        Eigen::MatrixXf data_norm = minMaxNormalization(data);
+        // choose which data normalization to use
+        auto norm_data = [&](const Eigen::MatrixXf& dat) {
+            if (norm == DATA_NORM::MINMAX)
+                return minMaxNormalization(dat);
+            else if (norm == DATA_NORM::MEAN)
+                return meanNormalization(dat);
+            else // norm == DATA_NORM::NONE
+                return dat;
+        };
 
-        // choose which pcaSVD algorithm to use and execute it
+        // choose which pcaSVD algorithm to use 
         auto pca_alg = [&](const Eigen::MatrixXf& dat) {
             if (algorithm == PCA_ALG::SVD)
                 return pcaSVD(dat, num_comp);
@@ -240,11 +253,14 @@ namespace math {
                 return pcaCovMat(dat, num_comp);
         };
 
+        // prep data: normalization
+        Eigen::MatrixXf data_normed = norm_data(data);
+
         // compute pcaSVD, get first num_comp components
-        Eigen::MatrixXf principal_components = pca_alg(data_norm);
+        Eigen::MatrixXf principal_components = pca_alg(data_normed);
 
         // project data
-        Eigen::MatrixXf data_transformed = pcaTransform(data_norm, principal_components);
+        Eigen::MatrixXf data_transformed = pcaTransform(data_normed, principal_components);
 
         // compute 2 pca components and convert to std vector with [p0d0, p0d1, ..., p1d0, p1d1, ..., pNd0, pNd1, ..., pNdM]
         pca_out = convertEigenMatrixToStdVector(data_transformed);
