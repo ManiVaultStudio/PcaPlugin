@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.datasets import load_digits
+from sklearn.datasets import load_digits, load_iris
 from sklearn.decomposition import PCA
 import os
 
@@ -8,15 +8,22 @@ if not os.path.isdir('data'):
     os.mkdir('data')
 
 
+def saveMetaInfoAsJson(info, filename):
+    import json
+    print(f"Save meta data to {filename}.json")
+    with open(filename + ".json", "w") as f:
+        json.dump(info, f, indent=4)
+
+
 # define save function
 def saveAsBinary(dataToSave, filename, type=np.single):
-    dataToSave.astype(type).tofile(filename)
-    #with open(filename, 'wb') as f:
-    #    np.save(f, dataToSave.astype(type))
+    print(f"Save data to {filename}.bin")
+    dataToSave.astype(type).tofile(filename + ".bin")
+    saveMetaInfoAsJson({"Binary file": filename + ".bin", "Data points": data.shape[0], "Dimensions": data.shape[1], "dtype": type.__name__}, filename)
 
 
 # define data
-data = load_digits().data.astype(np.single)
+data = load_iris().data.astype(np.single)
 num_points, num_dims = data.shape
 
 print(f"Use sklearn digits dataset. \nNumber of points: {num_points} with {num_dims} dimensions each")
