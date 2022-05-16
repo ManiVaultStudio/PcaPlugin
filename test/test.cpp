@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <filesystem>
+#include <source_location>
 #include <iostream>
 
 #include "PCA.h"
@@ -14,11 +15,16 @@
 // then, for the digits, try out only one data set (some norm) in the settings list
 // try out different sklearn data sets
 
-const std::filesystem::path dataDir = std::filesystem::current_path() / "data" / "";
+const std::filesystem::path current_file_path = std::source_location::current().file_name();
+const std::filesystem::path dataDir = current_file_path.parent_path() / "data" / "";
 
 // digits data set info
-const size_t num_points = 1797;
-const size_t num_dims = 64;
+//const size_t num_points = 1797;
+//const size_t num_dims = 64;
+
+// iris data set info
+const size_t num_points = 150;
+const size_t num_dims = 4;
 
 template<class T>
 void printVector(std::vector<T>& vec)
@@ -66,7 +72,7 @@ void readBinaryToStdVector(const std::string fileName, std::vector<float>& data)
 
 TEST_CASE("PCA SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
-	const std::string fileName = dataDir.string() + "data";
+	const std::string fileName = dataDir.string() + "data.bin";
 	std::vector<float> data_in;
 	readBinaryToStdVector(fileName, data_in);
 
@@ -78,11 +84,11 @@ TEST_CASE("PCA SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 		// Read the reference values
 		std::vector<float> data_norm_reference;
-		readBinaryToStdVector(dataDir.string() + "data_norm_minmax", data_norm_reference);
+		readBinaryToStdVector(dataDir.string() + "data_norm_minmax.bin", data_norm_reference);
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "pca_norm_minmax_2", principal_components_reference);
+		readBinaryToStdVector(dataDir.string() + "pca_norm_minmax_2.bin", principal_components_reference);
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "trans_norm_minmax_2", data_transformed_reference);
+		readBinaryToStdVector(dataDir.string() + "trans_norm_minmax_2.bin", data_transformed_reference);
 
 		// convert HsneMatrix to Eigen MatrixXf
 		Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
@@ -123,7 +129,7 @@ TEST_CASE("PCA SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 //TEST_CASE("PCA SVD raw data", "[PCA][SVD]") {
 //
-//    const std::string fileName = dataDir.string() +  "data";
+//    const std::string fileName = dataDir.string() +  "data.bin";
 //    std::vector<float> data_in;
 //    readBinaryToStdVector(fileName, data_in);
 //
@@ -135,9 +141,9 @@ TEST_CASE("PCA SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 //
 //		// Read the reference values
 //		std::vector<float> principal_components_reference;
-//		readBinaryToStdVector(dataDir.string() + "pca_raw_2", principal_components_reference);
+//		readBinaryToStdVector(dataDir.string() + "pca_raw_2.bin", principal_components_reference);
 //		std::vector<float> data_transformed_reference;
-//		readBinaryToStdVector(dataDir.string() + "trans_raw_2", data_transformed_reference);
+//		readBinaryToStdVector(dataDir.string() + "trans_raw_2.bin", data_transformed_reference);
 //
 //        // convert HsneMatrix to Eigen MatrixXf
 //        Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
