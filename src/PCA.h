@@ -83,6 +83,10 @@ namespace math {
         return idx;
     }
 
+    inline Eigen::MatrixXf colwiseZeroMean(const Eigen::MatrixXf& mat) {
+        return mat.rowwise() - mat.colwise().mean();
+    }
+
     /// /// ///
     /// PCA ///
     /// /// ///
@@ -109,7 +113,7 @@ namespace math {
         const size_t num_col = mat.cols();
 
         // center around mean per attribute
-        Eigen::MatrixXf mat_norm = mat.rowwise() - mat.colwise().mean();
+        Eigen::MatrixXf mat_norm = colwiseZeroMean(mat);
 
         // norm with (max - min) attributes
         Eigen::VectorXf normFacs = mat.colwise().maxCoeff() - mat.colwise().minCoeff();
@@ -165,6 +169,7 @@ namespace math {
         return mat_norm;
     }
 
+    // data should be have column-wise zero empirical mean 
     inline Eigen::MatrixXf pcaSVD(const Eigen::MatrixXf& data, size_t& num_comp)
     {
         const size_t num_row = data.rows();
@@ -184,6 +189,7 @@ namespace math {
 
     }
 
+    // data should be have column-wise zero empirical mean 
     inline Eigen::MatrixXf pcaCovMat(const Eigen::MatrixXf& data, size_t& num_comp) {
         const size_t num_row = data.rows();
         const size_t num_col = data.cols();
@@ -255,6 +261,9 @@ namespace math {
 
         // prep data: normalization
         Eigen::MatrixXf data_normed = norm_data(data);
+
+        // Center the values of each variable in the dataset on 0 by subtracting the mean of the variable's observed values from each of those values
+        data_normed = colwiseZeroMean(data_normed);
 
         // compute pcaSVD, get first num_comp components
         Eigen::MatrixXf principal_components = pca_alg(data_normed);

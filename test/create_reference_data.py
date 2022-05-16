@@ -19,7 +19,7 @@ def saveMetaInfoAsJson(info, filename):
 def saveAsBinary(dataToSave, filename, type=np.single):
     print(f"Save data to {filename}.bin")
     dataToSave.astype(type).tofile(filename + ".bin")
-    saveMetaInfoAsJson({"Binary file": filename + ".bin", "Data points": data.shape[0], "Dimensions": data.shape[1], "dtype": type.__name__}, filename)
+    saveMetaInfoAsJson({"Binary file": filename + ".bin", "Data points": dataToSave.shape[0], "Dimensions": dataToSave.shape[1], "dtype": type.__name__}, filename)
 
 
 # define data
@@ -72,11 +72,11 @@ for dat, pca_save_path, trans_save_path in settingsList:
         pca.fit(dat)
 
         # Save pca as binary to disk
-        saveAsBinary(pca.components_, f'{pca_save_path}_{num_comps}')
+        saveAsBinary(pca.components_.T, f'{pca_save_path}_{num_comps}')
 
         # Transform data
         print("Transform...")
-        trans = np.matmul(dat, pca.components_.T)
+        trans = pca.transform(dat)
         saveAsBinary(trans, f'{trans_save_path}_{num_comps}')
 
 
@@ -107,17 +107,42 @@ saveAsBinary(X_norm_minmax, 'data/sklearn_data_norm_minmax')
 
 pca = PCA(n_components=2)
 pca.fit(X)
-saveAsBinary(pca.components_, f'data/sklearn_pca')
+saveAsBinary(pca.components_.T, f'data/sklearn_pca')
 saveAsBinary(pca.transform(X), f'data/sklearn_trans')
 
 pca = PCA(n_components=2)
 pca.fit(X_norm_mean)
-saveAsBinary(pca.components_, f'data/sklearn_pca_norm_mean')
+saveAsBinary(pca.components_.T, f'data/sklearn_pca_norm_mean')
 saveAsBinary(pca.transform(X_norm_mean), f'data/sklearn_trans_norm_mean')
 
 pca = PCA(n_components=2)
 pca.fit(X_norm_minmax)
-saveAsBinary(pca.components_, f'data/sklearn_pca_norm_minmax')
+saveAsBinary(pca.components_.T, f'data/sklearn_pca_norm_minmax')
 saveAsBinary(pca.transform(X_norm_minmax), f'data/sklearn_trans_norm_minmax')
+
+#######
+# numpy example
+# https://scikit-learn.org/1.1/modules/generated/sklearn.decomposition.PCA.html
+#######
+# define data
+X2 = np.array([[1, 1, 3], [2, 1, 4], [-3, 2, 0], [0.1, 0.5, 0.8], [2, 1, 1], [4, 2, 3]])
+# center data
+C = X2 - np.mean(X2, axis=0)
+# covariance matrix of centered data
+V = np.cov(C.T)
+# eigendecomposition of covariance matrix
+_, evecs = np.linalg.eig(V)
+print(evecs)
+# project data
+P = evecs.T.dot(C.T)
+print(P.T)
+
+# numpy vs sklearn check
+pca = PCA(n_components=3)
+pca.fit(X2)
+
+P2 = pca.transform(X2)
+
+assert np.all(np.abs(P2) - np.abs(P.T) < 0.001)
 
 print("Done.")

@@ -88,15 +88,15 @@ void readBinaryToStdVector(const std::string fileName, std::vector<float>& data)
 	}
 }
 
-TEST_CASE("Sklearn example data", "[PCA][COV]") {
+TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]") {
 	// https://scikit-learn.org/1.1/modules/generated/sklearn.decomposition.PCA.html
-
 	// Sklearn example info
 	const size_t num_points = 6;
 	const size_t num_dims = 2;
 
-
 	SECTION("SKLEARN") {
+		printLine("Sklearn example data: no norm");
+
 		size_t num_comp = 2;
 
 		const std::string fileName = dataDir.string() + "sklearn_data.bin";
@@ -138,6 +138,8 @@ TEST_CASE("Sklearn example data", "[PCA][COV]") {
 	}
 
 	SECTION("SKLEARN - NORM MINMAX") {
+		printLine("Sklearn example data: norm minmax");
+
 		size_t num_comp = 2;
 
 		// Load data
@@ -166,6 +168,8 @@ TEST_CASE("Sklearn example data", "[PCA][COV]") {
 	}
 
 	SECTION("SKLEARN - NORM MEAN") {
+		printLine("Sklearn example data: norm mean");
+
 		size_t num_comp = 2;
 
 		// Load data
@@ -195,49 +199,50 @@ TEST_CASE("Sklearn example data", "[PCA][COV]") {
 
 }
 
-TEST_CASE("TOY DATA", "[PCA]") {
+TEST_CASE("Toy data", "[PCA][SVD][COV]") {
 
-	SECTION("TEST") {
+	SECTION("TOY") {
+		printLine("Toy data: no norm");
+
 		const size_t num_pts = 6;
 		const size_t num_dim = 3;
 		size_t num_comp = 3;
 
+		// define data
 		Matrix data = { {1, 1, 3}, {2, 1, 4}, {-3, 2, 0}, {0.1, 0.5, 0.8}, {2, 1, 1}, {4, 2, 3} };
-
 		Eigen::MatrixXf eigen_data(num_pts, num_dim);
 		eigen_data << 1, 1, 3, 2, 1, 4, -3, 2, 0, 0.1, 0.5, 0.8, 2, 1, 1, 4, 2, 3;
-		printLine("eigen_data");
-		std::cout << eigen_data << std::endl;
+		
+		const std::vector<float> reference_components{ 0.86774688, -0.49679373,  0.01453782, -0.02012211, -0.00589032,  0.99978018,  0.49659889,  0.86784866, 0.01510785 };
+		const std::vector<float> reference_transform{  0.50372027,  0.90652942, -0.2345759,   1.86806603,  1.27758436, -0.20493023, -4.47718603,  0.28426804, 0.66172945,
+													  -1.35970842, -0.55267811, -0.78078729,  0.37826936, -1.32596162, -0.25025377,  3.08683879, -0.58974208, 0.80881774 };
 
-		//Eigen::MatrixXf data_norm = math::minMaxNormalization(eigen_data);
-		//printLine("data_norm");
-		//std::cout << data_norm << std::endl;
+		// center the data
+		eigen_data = eigen_data.rowwise() - eigen_data.colwise().mean();
 
-		Eigen::MatrixXf matrixV = math::pcaCovMat(eigen_data, num_comp);
-		printLine("matrixV");
-		std::cout << matrixV << std::endl;
+		// compute svd
+		Eigen::MatrixXf matrixV = math::pcaSVD(eigen_data, num_comp);
+		REQUIRE(compEigAndStdMatrixAppr(matrixV, reference_components));
 
+		// project centered data
 		Eigen::MatrixXf trans = math::pcaTransform(eigen_data, matrixV);
-		printLine("trans");
-		std::cout << trans << std::endl;
+		REQUIRE(compEigAndStdMatrixAppr(trans, reference_transform));
 
+		// convert from eigen to std vector
 		std::vector<float> trans_std = math::convertEigenMatrixToStdVector(trans);
-		printLine("trans_std");
-		printVector(trans_std);
+		REQUIRE(compStdAndStdMatrixAppr(trans_std, reference_transform));
 
-
+		// use combined function instead of calling each step and use covariance instead of svd function
 		auto data_std = math::convertEigenMatrixToStdVector(eigen_data);
 		std::vector<float> transCOV;
-		math::pca(data_std, num_dim, transCOV, num_comp, math::PCA_ALG::COV, math::DATA_NORM::MINMAX);
+		math::pca(data_std, num_dim, transCOV, num_comp, math::PCA_ALG::COV, math::DATA_NORM::NONE);
 
-		printLine("transCOV");
-		std::cout << math::convertStdVectorToEigenMatrix(transCOV, num_comp) << std::endl;
-
+		REQUIRE(compStdAndStdMatrixAppr(transCOV, reference_transform));
 	}
 
 }
 
-TEST_CASE("PCA SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
+TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 	const std::string fileName = dataDir.string() + "data.bin";
 	std::vector<float> data_in;
@@ -250,127 +255,241 @@ TEST_CASE("PCA SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 	// check of data set was loaded correctly
 	REQUIRE(data_in.size() == num_points * num_dims);
 
-	SECTION("Do it again") {
-		size_t num_comp = num_dims;
+	std::vector<float> principal_components_std;
+	std::vector<float> data_transformed_std;
 
-		// Read the reference values
-		std::vector<float> data_norm_reference;
-		readBinaryToStdVector(dataDir.string() + "data_norm_minmax.bin", data_norm_reference);
-		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "pca_norm_minmax_4.bin", principal_components_reference);
-		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "trans_norm_minmax_4.bin", data_transformed_reference);
-
-		// check of data set was loaded correctly
-		REQUIRE(data_norm_reference.size() == num_points * num_dims);
-		REQUIRE(principal_components_reference.size() == num_comp * num_dims);
-		REQUIRE(data_transformed_reference.size() == num_points * num_comp);
-
+	auto individualSteps = [&](std::vector<float>& pcs_std, std::vector<float>& trans_std, size_t num_comp) -> void {
+		// convert HsneMatrix to Eigen MatrixXf
 		Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
 
-		printLine("data");
-		std::cout << data.block(0, 0, 5, 4) << std::endl;
+		// min max norm
+		Eigen::MatrixXf data_normed = math::minMaxNormalization(data);
 
-		Eigen::MatrixXf data_norm = math::minMaxNormalization(data);
-		printLine("data_norm");
-		std::cout << data_norm.block(0, 0, 5, 4) << std::endl;
+		// center the data
+		data_normed = math::colwiseZeroMean(data_normed);
 
-		Eigen::MatrixXf matrixV = math::pcaCovMat(data_norm, num_comp);
-		printLine("matrixV");
-		std::cout << matrixV << std::endl;
+		// compute pcaSVD, get first num_comp components
+		Eigen::MatrixXf principal_components = math::pcaSVD(data_normed, num_comp);
+		pcs_std = math::convertEigenMatrixToStdVector(principal_components);
 
-		Eigen::MatrixXf trans = math::pcaTransform(data_norm, matrixV);
-		printLine("trans");
-		std::cout << trans.block(0, 0, 5, 4) << std::endl;
+		// project data
+		Eigen::MatrixXf data_transformed = math::pcaTransform(data_normed, principal_components);
+		trans_std = math::convertEigenMatrixToStdVector(data_transformed);
+	};
 
-	}
-
-	SECTION("All components") {
+	SECTION("Two components individual steps") {
+		printLine("Iris data: 2 comp individual steps, SVD MinMaxNorm");
 		size_t num_comp = 2;
 
-		// Read the reference values
+		// Load the reference values
 		std::vector<float> principal_components_reference;
 		readBinaryToStdVector(dataDir.string() + "pca_norm_minmax_2.bin", principal_components_reference);
 		std::vector<float> data_transformed_reference;
 		readBinaryToStdVector(dataDir.string() + "trans_norm_minmax_2.bin", data_transformed_reference);
 
-		// convert HsneMatrix to Eigen MatrixXf
-		Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
-		printLine("data.block");
-		std::cout << data.block(0, 0, 4, 4) << std::endl;
+		individualSteps(principal_components_std, data_transformed_std, num_comp);
 
-		// compute pcaSVD, get first num_comp components
-		Eigen::MatrixXf principal_components = math::pcaSVD(data, num_comp);
-		std::vector<float> principal_components_std = math::convertEigenMatrixToStdVector(principal_components);
-		//printLine("principal_components.block");
-		//std::cout << principal_components.block(0, 0, 4, 2) << std::endl;
-		printLine("principal_components");
-		std::cout << principal_components << std::endl;
-		Eigen::MatrixXf principal_components_reference_mat = math::convertStdVectorToEigenMatrix(principal_components_reference, 4);
-		printLine("principal_components_reference_mat");
-		std::cout << principal_components_reference_mat << std::endl;
-
-		Eigen::MatrixXf trans = math::pcaTransform(data, principal_components);
-		printLine("trans");
-		std::cout << trans << std::endl;
-
-		printLine("principal_components_std");
-		printVector(principal_components_std);
-		printLine("principal_components_reference");
-		printVector(data_transformed_reference);
-		printLine("principal_components_reference");
-		printVector(data_transformed_reference, 10);
-		//REQUIRE(principal_components_std == principal_components_reference);
-
-		// project data
-		Eigen::MatrixXf data_transformed = math::pcaTransform(data, principal_components);
-		std::vector<float> data_transformed_std = math::convertEigenMatrixToStdVector(data_transformed);
-		//REQUIRE(data_transformed_std == data_transformed_reference);
+		
+		REQUIRE(compStdAndStdMatrixAppr(data_transformed_std, data_transformed_reference));
 
 	}
-	//   SECTION("All components") {
 
-	   //}
+	SECTION("All components individual steps") {
+		printLine("Iris data: 4 comp individual steps, SVD MinMaxNorm");
+		size_t num_comp = num_dims;
+
+		// Load the reference values
+		std::vector<float> principal_components_reference;
+		readBinaryToStdVector(dataDir.string() + "pca_norm_minmax_4.bin", principal_components_reference);
+		std::vector<float> data_transformed_reference;
+		readBinaryToStdVector(dataDir.string() + "trans_norm_minmax_4.bin", data_transformed_reference);
+
+		individualSteps(principal_components_std, data_transformed_std, num_comp);
+
+		REQUIRE(compStdAndStdMatrixAppr(principal_components_std, principal_components_reference));
+		REQUIRE(compStdAndStdMatrixAppr(data_transformed_std, data_transformed_reference));
+
+	}
+
+	SECTION("Two components single step") {
+		printLine("Iris data: 2 comp single step, SVD MinMaxNorm");
+		size_t num_comp = 2;
+
+		// Load the reference values
+		std::vector<float> principal_components_reference;
+		readBinaryToStdVector(dataDir.string() + "pca_norm_minmax_2.bin", principal_components_reference);
+		std::vector<float> data_transformed_reference;
+		readBinaryToStdVector(dataDir.string() + "trans_norm_minmax_2.bin", data_transformed_reference);
+
+		std::vector<float> transSVD;
+		math::pca(data_in, num_dims, transSVD, num_comp, math::PCA_ALG::SVD, math::DATA_NORM::MINMAX);
+
+		REQUIRE(compStdAndStdMatrixAppr(transSVD, data_transformed_reference));
+	}
+
+	SECTION("All components single step") {
+		printLine("Iris data: 4 comp single step, SVD MinMaxNorm");
+		size_t num_comp = num_dims;
+
+		// Load the reference values
+		std::vector<float> principal_components_reference;
+		readBinaryToStdVector(dataDir.string() + "pca_norm_minmax_4.bin", principal_components_reference);
+		std::vector<float> data_transformed_reference;
+		readBinaryToStdVector(dataDir.string() + "trans_norm_minmax_4.bin", data_transformed_reference);
+
+		std::vector<float> transSVD;
+		math::pca(data_in, num_dims, transSVD, num_comp, math::PCA_ALG::SVD, math::DATA_NORM::MINMAX);
+
+		REQUIRE(compStdAndStdMatrixAppr(transSVD, data_transformed_reference));
+	}
+
 }
 
-//TEST_CASE("PCA SVD raw data", "[PCA][SVD]") {
-//
-//    const std::string fileName = dataDir.string() +  "data.bin";
-//    std::vector<float> data_in;
-//    readBinaryToStdVector(fileName, data_in);
-//
-//	// check of digits data set was loaded correctly
-//	REQUIRE(data_in.size() == num_points * num_dims);
-//
-//    SECTION("2 components") {
-//		size_t num_comp = 2;
-//
-//		// Read the reference values
-//		std::vector<float> principal_components_reference;
-//		readBinaryToStdVector(dataDir.string() + "pca_raw_2.bin", principal_components_reference);
-//		std::vector<float> data_transformed_reference;
-//		readBinaryToStdVector(dataDir.string() + "trans_raw_2.bin", data_transformed_reference);
-//
-//        // convert HsneMatrix to Eigen MatrixXf
-//        Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
-//
-//		std::cout << data.block(0, 0, 4, 4);
-//
-//        // compute pcaSVD, get first num_comp components
-//        Eigen::MatrixXf principal_components = math::pcaSVD(data, num_comp);
-//
-//		std::cout << principal_components;
-//
-//		std::vector<float> principal_components_std = math::convertEigenMatrixToStdVector(principal_components);
-//		REQUIRE(principal_components_std == principal_components_reference);
-//
-//        // project data
-//        Eigen::MatrixXf data_transformed = math::pcaTransform(data, principal_components);
-//		std::vector<float> data_transformed_std = math::convertEigenMatrixToStdVector(data_transformed);
-//		REQUIRE(data_transformed_std == data_transformed_reference);
-//
-//	}
-// //   SECTION("All components") {
-//
-//	//}
-//}
+TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MinMaxNorm]") {
+
+	const std::string fileName = dataDir.string() + "data.bin";
+	std::vector<float> data_in;
+	readBinaryToStdVector(fileName, data_in);
+
+	// iris data set info
+	const size_t num_points = 150;
+	const size_t num_dims = 4;
+
+	// check of data set was loaded correctly
+	REQUIRE(data_in.size() == num_points * num_dims);
+
+	std::vector<float> principal_components_std;
+	std::vector<float> data_transformed_std;
+
+	auto individualSteps = [&](std::vector<float>& pcs_std, std::vector<float>& trans_std, size_t num_comp) -> void {
+		// convert HsneMatrix to Eigen MatrixXf
+		Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
+
+		// mean norm
+		Eigen::MatrixXf data_normed = math::meanNormalization(data);
+
+		// center the data
+		data_normed = math::colwiseZeroMean(data_normed);
+
+		// compute pcaSVD, get first num_comp components
+		Eigen::MatrixXf principal_components = math::pcaCovMat(data_normed, num_comp);
+		pcs_std = math::convertEigenMatrixToStdVector(principal_components);
+
+		// project data
+		Eigen::MatrixXf data_transformed = math::pcaTransform(data_normed, principal_components);
+		trans_std = math::convertEigenMatrixToStdVector(data_transformed);
+	};
+
+	SECTION("Two components individual steps") {
+		printLine("Iris data: 2 comp individual steps, COV MeanNorm");
+		size_t num_comp = 2;
+
+		// Load the reference values
+		std::vector<float> principal_components_reference;
+		readBinaryToStdVector(dataDir.string() + "pca_norm_mean_2.bin", principal_components_reference);
+		std::vector<float> data_transformed_reference;
+		readBinaryToStdVector(dataDir.string() + "trans_norm_mean_2.bin", data_transformed_reference);
+
+		individualSteps(principal_components_std, data_transformed_std, num_comp);
+
+		REQUIRE(compStdAndStdMatrixAppr(principal_components_std, principal_components_reference));
+		REQUIRE(compStdAndStdMatrixAppr(data_transformed_std, data_transformed_reference));
+
+	}
+
+	SECTION("All components individual steps") {
+		printLine("Iris data: 4 comp individual steps, COV MeanNorm");
+		size_t num_comp = num_dims;
+
+		// Load the reference values
+		std::vector<float> principal_components_reference;
+		readBinaryToStdVector(dataDir.string() + "pca_norm_mean_4.bin", principal_components_reference);
+		std::vector<float> data_transformed_reference;
+		readBinaryToStdVector(dataDir.string() + "trans_norm_mean_4.bin", data_transformed_reference);
+
+		individualSteps(principal_components_std, data_transformed_std, num_comp);
+
+		REQUIRE(compStdAndStdMatrixAppr(principal_components_std, principal_components_reference));
+		REQUIRE(compStdAndStdMatrixAppr(data_transformed_std, data_transformed_reference));
+
+	}
+
+	SECTION("Two components single step") {
+		printLine("Iris data: 2 comp single step, COV MeanNorm");
+		size_t num_comp = 2;
+
+		// Load the reference values
+		std::vector<float> principal_components_reference;
+		readBinaryToStdVector(dataDir.string() + "pca_norm_mean_2.bin", principal_components_reference);
+		std::vector<float> data_transformed_reference;
+		readBinaryToStdVector(dataDir.string() + "trans_norm_mean_2.bin", data_transformed_reference);
+
+		std::vector<float> transSVD;
+		math::pca(data_in, num_dims, transSVD, num_comp, math::PCA_ALG::COV, math::DATA_NORM::MEAN);
+
+		REQUIRE(compStdAndStdMatrixAppr(transSVD, data_transformed_reference));
+	}
+
+	SECTION("All components single step") {
+		printLine("Iris data: 4 comp single step, COV MeanNorm");
+		size_t num_comp = num_dims;
+
+		// Load the reference values
+		std::vector<float> principal_components_reference;
+		readBinaryToStdVector(dataDir.string() + "pca_norm_mean_4.bin", principal_components_reference);
+		std::vector<float> data_transformed_reference;
+		readBinaryToStdVector(dataDir.string() + "trans_norm_mean_4.bin", data_transformed_reference);
+
+		std::vector<float> transSVD;
+		math::pca(data_in, num_dims, transSVD, num_comp, math::PCA_ALG::COV, math::DATA_NORM::MEAN);
+
+		REQUIRE(compStdAndStdMatrixAppr(transSVD, data_transformed_reference));
+	}
+
+}
+
+TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
+
+	const std::string fileName = dataDir.string() + "data.bin";
+	std::vector<float> data_in;
+	readBinaryToStdVector(fileName, data_in);
+
+	// iris data set info
+	const size_t num_points = 150;
+	const size_t num_dims = 4;
+
+	// check of data set was loaded correctly
+	REQUIRE(data_in.size() == num_points * num_dims);
+
+	// convert HsneMatrix to Eigen MatrixXf
+	Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
+
+
+	SECTION("Mean Norm") {
+		printLine("Iris data: Mean Norm");
+
+		std::vector<float> data_normed_reference;
+		readBinaryToStdVector(dataDir.string() + "data_norm_mean.bin", data_normed_reference);
+
+		// mean norm
+		Eigen::MatrixXf data_normed = math::meanNormalization(data);
+
+		REQUIRE(compEigAndStdMatrixAppr(data_normed, data_normed_reference));
+
+	}
+
+	SECTION("MinMax Norm") {
+		printLine("Iris data: MinMax Norm");
+
+		std::vector<float> data_normed_reference;
+		readBinaryToStdVector(dataDir.string() + "data_norm_minmax.bin", data_normed_reference);
+
+		// mean norm
+		Eigen::MatrixXf data_normed = math::minMaxNormalization(data);
+
+		REQUIRE(compEigAndStdMatrixAppr(data_normed, data_normed_reference));
+
+	}
+
+
+}
