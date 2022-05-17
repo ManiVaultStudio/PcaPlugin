@@ -54,23 +54,23 @@ data = load_iris().data.astype(np.single)
 num_points, num_dims = data.shape
 
 print(f"Use sklearn digits dataset. \nNumber of points: {num_points} with {num_dims} dimensions each")
-print("Save data")
-saveAsBinary(data, 'data/data')
+print("Save iris data")
+saveAsBinary(data, 'data/iris_data')
 
 # preprocessing: mean normalization and min-max normalization
 data_norm_mean, data_norm_minmax = proprocessNorm(data)
 
 # Save data as binary to disk
 print("Save normalized data")
-saveAsBinary(data_norm_mean, 'data/data_norm_mean')
-saveAsBinary(data_norm_minmax, 'data/data_norm_minmax')
+saveAsBinary(data_norm_mean, 'data/iris_data_norm_mean')
+saveAsBinary(data_norm_minmax, 'data/iris_data_norm_minmax')
 
 # perform PCA for 2 and for all components
 print("Perform PCA and save to disk")
 
-settingsList = [[data, 'data/pca_raw', 'data/trans_raw'],
-                [data_norm_minmax, 'data/pca_norm_minmax', 'data/trans_norm_minmax'],
-                [data_norm_mean, 'data/pca_norm_mean', 'data/trans_norm_mean']]
+settingsList = [[data, 'data/iris_pca', 'data/iris_trans'],
+                [data_norm_minmax, 'data/iris_pca_norm_minmax', 'data/iris_trans_norm_minmax'],
+                [data_norm_mean, 'data/iris_pca_norm_mean', 'data/iris_trans_norm_mean']]
 
 for dat, pca_save_path, trans_save_path in settingsList:
     for num_comps in [2, num_dims]:

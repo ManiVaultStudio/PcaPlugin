@@ -35,7 +35,7 @@ ENDIF()
 # don't use find_package (Eigen3 3.4 REQUIRED) for now since this requires more user setup
 
 if(DEFINED ENV{CATCH2_DIR})
-    set(CATCH2_DIR $ENV{CATCH2_DIR} CACHE PATH  "Path to HDILib_slim")
+    set(CATCH2_DIR $ENV{CATCH2_DIR} CACHE PATH  "Path to Catch2")
 endif()
 
 find_package(Catch2 3 REQUIRED PATH ${CATCH2_DIR})
@@ -43,7 +43,16 @@ find_package(Catch2 3 REQUIRED PATH ${CATCH2_DIR})
 IF( ${Catch2_FOUND} )
     MESSAGE( STATUS "Catch2 found at ${Catch2_DIR}")
 ENDIF()
-# don't use find_package (Catch2 3 REQUIRED) for now since this requires more user setup
+
+if(DEFINED ENV{nlohmann_json_DIR})
+    set(nlohmann_json_DIR $ENV{nlohmann_json_DIR} CACHE PATH  "Path to nlohmann_json")
+endif()
+
+find_package(nlohmann_json 3.2.0 REQUIRED ${nlohmann_json_DIR})
+
+IF( ${NLOHMANN_JSON_FOUND} )
+    MESSAGE( STATUS "NLOHMANN_JSON found at ${nlohmann_json_DIR}")
+ENDIF()
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -77,6 +86,8 @@ target_include_directories(${PCA_TESTS} PRIVATE "${EIGEN3_INCLUDE_DIR}")
 # -----------------------------------------------------------------------------
 # linking against catch will add the proper include path
 target_link_libraries(${PCA_TESTS} PRIVATE Catch2::Catch2WithMain)
+
+target_link_libraries(${PCA_TESTS} PRIVATE nlohmann_json::nlohmann_json)
 
 # -----------------------------------------------------------------------------
 # Target properties
