@@ -87,6 +87,27 @@ namespace math {
         return mat.rowwise() - mat.colwise().mean();
     }
 
+    // Sign correction to ensure deterministic output 
+    // Is in svd_flip from scikit-learn, https://github.com/scikit-learn/scikit-learn
+    inline Eigen::MatrixXf standardOrientation(const Eigen::MatrixXf& mat)
+    {
+        // rowwise: which column has the max abs value
+        // then get the sign of the max abs value
+        Eigen::VectorXf signs(mat.rows());
+        Eigen::VectorXf::Index colID;
+        for (unsigned int rowID = 0; rowID < mat.rows(); rowID++)
+        {
+            mat.row(rowID).cwiseAbs().maxCoeff(&colID);
+            signs[rowID] = (mat(rowID, colID) >= 0) ? 1 : -1;
+        }
+
+        //std::cout << mat << std::endl;
+        //std::cout << signs << std::endl;
+        //Eigen::MatrixXf test = mat.array().colwise() * signs.array(); // flip signs of rows
+        //std::cout << test << std::endl;
+        return mat.array().colwise() * signs.array();
+    }
+
     /// /// ///
     /// PCA ///
     /// /// ///

@@ -51,6 +51,7 @@ ENDIF()
 
 set(SOURCES
     test.cpp
+	test_utils.h
 )
 
 source_group( Tests FILES ${SOURCES})
