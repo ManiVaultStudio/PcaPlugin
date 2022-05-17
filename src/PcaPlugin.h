@@ -78,6 +78,9 @@ public:
     /** Destructor */
     ~PCAPluginFactory() override {}
 
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
+
     /** Creates an instance of the example analysis plugin */
     AnalysisPlugin* produce() override;
 

@@ -40,7 +40,7 @@ namespace math {
         const size_t num_row = data_in.size() / num_dims;
         const size_t num_col = num_dims;
 
-        // convert HsneMatrix to Eigen MatrixXf
+        // convert std vector to Eigen MatrixXf
         // each row in MatrixXf corresponds to one data point
         Eigen::MatrixXf data(num_row, num_col);     	// num_rows (data points), num_cols (attributes)
 
@@ -256,7 +256,16 @@ namespace math {
 
     inline void pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, PCA_ALG algorithm = PCA_ALG::SVD, DATA_NORM norm = DATA_NORM::MINMAX)
     {
-        // convert HsneMatrix to Eigen MatrixXf
+        // do not transform if data is 1d
+        if (num_dims == 1)
+        {
+            num_comp = num_dims;
+            pca_out = data_in;
+            std::cout << "pca: num_dims == 1, no transformation is performed";
+            return;
+        }
+
+        // convert std vector to Eigen MatrixXf
         Eigen::MatrixXf data = convertStdVectorToEigenMatrix(data_in, num_dims);
 
         assert(data.rows() * data.cols() == data_in.size());

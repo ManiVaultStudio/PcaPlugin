@@ -11,6 +11,49 @@ Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
 using namespace hdps;
 using namespace hdps::plugin;
 
+/// ////////////////// ///
+/// SETTING CONVERSION ///
+/// ////////////////// ///
+
+math::PCA_ALG getPcaAlgorithm(size_t index) {
+    math::PCA_ALG alg = math::PCA_ALG::COV;
+
+    switch (index)
+    {
+    case 0:
+        alg = math::PCA_ALG::SVD;
+        break;
+    case 1:
+        alg = math::PCA_ALG::COV;
+        break;
+    }
+
+    return alg;
+}
+
+math::DATA_NORM getDataNorm(size_t index) {
+    math::DATA_NORM norm = math::DATA_NORM::NONE;
+
+    switch (index)
+    {
+    case 0:
+        norm = math::DATA_NORM::NONE;
+        break;
+    case 1:
+        norm = math::DATA_NORM::MEAN;
+        break;
+    case 2:
+        norm = math::DATA_NORM::MINMAX;
+        break;
+    }
+
+    return norm;
+
+}
+
+/// ////// ///
+/// PLUGIN ///
+/// ////// ///
 
 PCAPlugin::PCAPlugin(const PluginFactory* factory) :
     AnalysisPlugin(factory),
@@ -65,15 +108,6 @@ void PCAPlugin::onDataEvent(hdps::DataEvent* dataEvent)
 
 }
 
-template<class T>
-inline void printStdVector(const std::vector<T>& vec) {
-    for (auto& val : vec)
-    {
-        std::cout << val << " ";
-    }
-    std::cout << "\n";
-
-}
 
 void PCAPlugin::computePCA()
 {
@@ -95,10 +129,17 @@ void PCAPlugin::computePCA()
     getDataFromCore(data, dimensionIndices);
     size_t num_comps = _settingsAction.getNumberOfComponents().getValue();
 
+    // Get settings
+    math::PCA_ALG alg = getPcaAlgorithm(_settingsAction.getPcaAlgorithmAction().getCurrentIndex());
+    math::DATA_NORM norm = getDataNorm(_settingsAction.getDataNormAction().getCurrentIndex());
+
     // Do computation
     setTaskDescription("Computing...");
     std::vector<float> PCA;
-    math::pca(data, /* numer of dimension = */ dimensionIndices.size(), /* transformed PCA data = */ PCA, /* number of pca components = */ num_comps);
+    math::pca(data, /* number of dimension = */ dimensionIndices.size(), /* transformed PCA data = */ PCA, /* number of pca components = */ num_comps,
+                    /* pca algorithm = */ alg, /* data normalization = */ norm);
+
+    std::cout << "PCA Plugin: Finished computing PCA transformation with " << num_comps << " components" << std::endl;
 
     // Publish pca to core
     setPCADataInCore(PCA, num_comps);
@@ -135,6 +176,11 @@ void PCAPlugin::setPCADataInCore(std::vector<float>& data, size_t num_components
     outputDataset->setData(data, num_components);
 
     _core->notifyDatasetChanged(outputDataset);
+}
+
+QIcon PCAPluginFactory::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("braille");
 }
 
 AnalysisPlugin* PCAPluginFactory::produce()

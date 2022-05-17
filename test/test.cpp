@@ -207,7 +207,7 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 	std::vector<float> data_transformed_std;
 
 	auto individualSteps = [&](std::vector<float>& pcs_std, std::vector<float>& trans_std, size_t num_comp) -> void {
-		// convert HsneMatrix to Eigen MatrixXf
+		// convert std vec to Eigen MatrixXf
 		Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
 
 		// min max norm
@@ -317,7 +317,7 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MinMaxNorm]") {
 	std::vector<float> data_transformed_std;
 
 	auto individualSteps = [&](std::vector<float>& pcs_std, std::vector<float>& trans_std, size_t num_comp) -> void {
-		// convert HsneMatrix to Eigen MatrixXf
+		// convert std vec to Eigen MatrixXf
 		Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
 
 		// mean norm
@@ -423,7 +423,7 @@ TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
 	// check of data set was loaded correctly
 	REQUIRE(data_in.size() == num_points * num_dims);
 
-	// convert HsneMatrix to Eigen MatrixXf
+	// convert std vec to Eigen MatrixXf
 	Eigen::MatrixXf data = math::convertStdVectorToEigenMatrix(data_in, num_dims);
 
 
