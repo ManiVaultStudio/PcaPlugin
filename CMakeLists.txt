@@ -40,12 +40,17 @@ message(STATUS "Install plugin to ${INSTALL_DIR}")
 
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-IF( NOT DEFINED EIGEN3_INCLUDE_DIR )
-    MESSAGE( FATAL_ERROR "Define EIGEN3_INCLUDE_DIR, the directory of Eigen3")
-ELSE()
-	MESSAGE( STATUS "Eigen headers at ${EIGEN3_INCLUDE_DIR}")
+# EIGEN3
+if(DEFINED ENV{EIGEN3_DIR})
+    set(EIGEN3_DIR $ENV{EIGEN3_DIR} CACHE PATH  "Path to Eigen3")
+endif()
+
+find_package (Eigen3 3.4 REQUIRED NO_MODULE)
+
+IF( ${EIGEN3_FOUND} )
+    MESSAGE( STATUS "Eigen3 found at ${EIGEN3_DIR}")
 ENDIF()
-# don't use find_package (Eigen3 3.4 REQUIRED) for now since this requires more user setup
+
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -78,17 +83,16 @@ add_library(${PCA_PLUGIN} SHARED ${SOURCES})
 # Include HDPS core headers
 target_include_directories(${PCA_PLUGIN} PRIVATE "${HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-# Include external headers
-target_include_directories(${PCA_PLUGIN} PRIVATE "${EIGEN3_INCLUDE_DIR}")
-
 # -----------------------------------------------------------------------------
 # Target library linking
 # -----------------------------------------------------------------------------
 
-target_link_libraries(${PCA_PLUGIN} Qt5::Widgets)
-target_link_libraries(${PCA_PLUGIN} Qt5::WebEngineWidgets)
-target_link_libraries(${PCA_PLUGIN} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
-target_link_libraries(${PCA_PLUGIN} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointData.lib")
+target_link_libraries(${PCA_PLUGIN} PRIVATE Qt5::Widgets)
+target_link_libraries(${PCA_PLUGIN} PRIVATE Qt5::WebEngineWidgets)
+target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
+target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointData.lib")
+
+target_link_libraries(${PCA_PLUGIN} PRIVATE Eigen3::Eigen)
 
 # -----------------------------------------------------------------------------
 # Target properties

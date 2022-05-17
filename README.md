@@ -8,7 +8,7 @@ This plugin implements two PCA computation algorithms: Explicitly computing the 
 
 ## Dependencies
 
-- Eigen 3.4: Download the header-only library [Eigen](https://gitlab.com/libeigen/eigen) and pass the top level directory of your local copy as `EIGEN3_INCLUDE_DIR` to cmake ot setup Eigen as described in their [documentation](https://eigen.tuxfamily.org/dox/TopicCMakeGuide.html).
+- Eigen 3.4: Setup [Eigen](https://gitlab.com/libeigen/eigen) as described in their [documentation](https://eigen.tuxfamily.org/dox/TopicCMakeGuide.html).
 
 ## Testing
 You can perform unit tests, see `test/README.md` (there are more dependencies). Set the cmake variable UNIT_TESTS to build tests.
