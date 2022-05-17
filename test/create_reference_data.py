@@ -22,6 +22,33 @@ def saveAsBinary(dataToSave, filename, type=np.single):
     saveMetaInfoAsJson({"Binary file": filename + ".bin", "Data points": dataToSave.shape[0], "Dimensions": dataToSave.shape[1], "dtype": type.__name__}, filename)
 
 
+def proprocessNorm(dat):
+    n_points, n_dims = dat.shape
+    # preprocessing: prep
+    d_means = np.mean(dat, axis=0)
+    d_mins = np.min(dat, axis=0)
+    d_maxs = np.max(dat, axis=0)
+    normFactors = d_maxs - d_mins
+
+    # preprocessing: mean normalization
+    dat_norm_mean = dat.copy()
+    dat_norm_mean -= d_means
+
+    # preprocessing: min-max normalization
+    dat_norm_minmax = dat.copy()
+    dat_norm_minmax -= d_mins
+
+    # preprocessing: common
+    for col in range(n_dims):
+        if normFactors[col] < 0.0001:
+            continue
+        for row in range(n_points):
+            dat_norm_mean[row, col] /= normFactors[col]
+            dat_norm_minmax[row, col] /= normFactors[col]
+
+    return dat_norm_mean, dat_norm_minmax
+
+
 # define data
 data = load_iris().data.astype(np.single)
 num_points, num_dims = data.shape
@@ -30,27 +57,8 @@ print(f"Use sklearn digits dataset. \nNumber of points: {num_points} with {num_d
 print("Save data")
 saveAsBinary(data, 'data/data')
 
-# preprocessing: prep
-means = np.mean(data, axis=0)
-mins = np.min(data, axis=0)
-maxs = np.max(data, axis=0)
-normFacs = maxs - mins
-
-# preprocessing: mean normalization
-data_norm_mean = data.copy()
-data_norm_mean -= means
-
-# preprocessing: min-max normalization
-data_norm_minmax = data.copy()
-data_norm_minmax -= mins
-
-# preprocessing: common
-for col in range(num_dims):
-    if normFacs[col] < 0.0001:
-        continue
-    for row in range(num_points):
-        data_norm_mean[row, col] /= normFacs[col]
-        data_norm_minmax[row, col] /= normFacs[col]
+# preprocessing: mean normalization and min-max normalization
+data_norm_mean, data_norm_minmax = proprocessNorm(data)
 
 # Save data as binary to disk
 print("Save normalized data")
@@ -87,20 +95,8 @@ for dat, pca_save_path, trans_save_path in settingsList:
 print("sklearn example")
 X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]], dtype=float)
 
-# preprocessing: prep
-X_means = np.mean(X, axis=0)
-X_mins = np.min(X, axis=0)
-X_maxs = np.max(X, axis=0)
-X_normFacs = X_maxs - X_mins
-
-# preprocessing: mean normalization
-X_norm_mean = X.copy()
-X_norm_mean -= X_means
-
-# preprocessing: min-max normalization
-X_norm_minmax = X.copy()
-X_norm_minmax -= X_mins
-
+# preprocessing: mean normalization and min-max normalization
+X_norm_mean, X_norm_minmax = proprocessNorm(X)
 saveAsBinary(X, 'data/sklearn_data')
 saveAsBinary(X_norm_mean, 'data/sklearn_data_norm_mean')
 saveAsBinary(X_norm_minmax, 'data/sklearn_data_norm_minmax')
