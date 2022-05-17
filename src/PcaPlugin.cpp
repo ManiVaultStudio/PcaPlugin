@@ -51,6 +51,43 @@ math::DATA_NORM getDataNorm(size_t index) {
 
 }
 
+
+/// ////////// ///
+/// PCA WORKER ///
+/// ////////// ///
+PCAWorker::PCAWorker() :
+    _data(nullptr),
+    _num_comps(0),
+    _algorithm(math::PCA_ALG::COV),
+    _norm(math::DATA_NORM::NONE)
+{
+}
+
+PCAWorker::PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm) :
+    _data(data), 
+    _num_dims(num_dims),
+    _num_comps(num_comps), 
+    _algorithm(algorithm),
+    _norm(norm)
+{
+}
+
+void PCAWorker::setup(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm) {
+    _data = data;
+    _num_dims = num_dims;
+    _num_comps = num_comps;
+    _algorithm = algorithm;
+    _norm = norm;
+}
+
+void PCAWorker::compute() {
+    math::pca(*_data, /* number of dimension = */ _num_dims, /* transformed PCA data = */ _pca_out, /* number of pca components = */ _num_comps,
+                      /* pca algorithm = */ _algorithm, /* data normalization = */ _norm);
+
+    emit resultReady();
+}
+
+
 /// ////// ///
 /// PLUGIN ///
 /// ////// ///
@@ -58,8 +95,11 @@ math::DATA_NORM getDataNorm(size_t index) {
 PCAPlugin::PCAPlugin(const PluginFactory* factory) :
     AnalysisPlugin(factory),
     _settingsAction(this),
-    _dimensionSelectionAction(this)
+    _dimensionSelectionAction(this),
+    _pcaWorker(),
+    _workerThread(nullptr)
 {
+    qRegisterMetaType<std::vector<float>>();
 }
 
 void PCAPlugin::init()
@@ -91,6 +131,21 @@ void PCAPlugin::init()
     // Start the analysis when the user clicks the start analysis push button
     connect(&_settingsAction.getStartAnalysisAction(), &hdps::gui::TriggerAction::triggered, this, [&]() {
         computePCA();
+    });
+
+    connect(&_pcaWorker, &PCAWorker::resultReady, this, [&]() {
+        auto [pca_out, num_comps] = _pcaWorker.getRestuls();
+
+        // Publish pca to core
+        setPCADataInCore(pca_out, num_comps);
+
+        // Flag the analysis task as finished
+        setTaskFinished();
+
+        // Enabled action again
+        _settingsAction.getStartAnalysisAction().setEnabled(true);
+
+        std::cout << "PCA Plugin: Finished." << std::endl;
     });
 
     // Register for points datasets events using a custom callback function
@@ -133,22 +188,21 @@ void PCAPlugin::computePCA()
     math::PCA_ALG alg = getPcaAlgorithm(_settingsAction.getPcaAlgorithmAction().getCurrentIndex());
     math::DATA_NORM norm = getDataNorm(_settingsAction.getDataNormAction().getCurrentIndex());
 
-    // Do computation
+    // Computat in different thread
     setTaskDescription("Computing...");
-    std::vector<float> PCA;
-    math::pca(data, /* number of dimension = */ dimensionIndices.size(), /* transformed PCA data = */ PCA, /* number of pca components = */ num_comps,
-                    /* pca algorithm = */ alg, /* data normalization = */ norm);
 
-    std::cout << "PCA Plugin: Finished computing PCA transformation with " << num_comps << " components" << std::endl;
+    _pcaWorker.setup(std::make_shared<std::vector<float>>(data), dimensionIndices.size(), num_comps, alg, norm);
 
-    // Publish pca to core
-    setPCADataInCore(PCA, num_comps);
+    _workerThread = new QThread();
+    _pcaWorker.moveToThread(_workerThread);
 
-    // Flag the analysis task as finished
-    setTaskFinished();
+    connect(_workerThread, &QThread::finished, _workerThread, &QObject::deleteLater);   // delete thread after work is done
+    connect(this, &PCAPlugin::startPCA, &_pcaWorker, &PCAWorker::compute);              // setup pca computation 
 
-    // Enabled action again
-    _settingsAction.getStartAnalysisAction().setEnabled(true);
+    std::cout << "PCA Plugin: Starting computing PCA transformation with " << num_comps << " components (settings: alg " << static_cast<int>(alg) << ", norm " << static_cast<int>(norm) << ")" << std::endl;
+    _workerThread->start();
+    // once finished _pcaWorker will call a lamda defined in this->init() that publishes the PCA
+    emit startPCA();
 }
 
 void PCAPlugin::getDataFromCore(std::vector<float>& data, std::vector<unsigned int>& dimensionIndices)

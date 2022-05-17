@@ -6,5 +6,5 @@ Performs a [principal components analysis](https://en.wikipedia.org/wiki/Princip
 
 - Eigen 3.4: Download the header-only library [Eigen](https://gitlab.com/libeigen/eigen) and pass the top level directory of your local copy as `EIGEN3_INCLUDE_DIR` to cmake.
 
-## TODO
-- Add catch2 unit testing (check against pca computed in python with some random data)
+## Testing
+You can perform unit tests, see `test/README.md` (there are more dependencies). Set the cmake variable UNIT_TESTS to build tests.

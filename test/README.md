@@ -1,6 +1,8 @@
 # PCA Plugin Test
+Run `create_reference_data.py` to create reference data sets and reference PCA transformations before performing the tests.
 
-Create some test PCAs in python using [scikit-learn](https://scikit-learn.org).
-Load the data in cpp, compute a PCA and compare with the reference values.
+The reference values are created in python using [scikit-learn](https://scikit-learn.org) and [numpy](https://numpy.org/).
 
-Run `create_reference_data.py` to create the reference values.
+## Dependencies:
+- [Catch2](https://github.com/catchorg/Catch2) for unit testing
+- [nlohmann_json](https://github.com/nlohmann/json) for reading meta data about the test data from json files in cpp
