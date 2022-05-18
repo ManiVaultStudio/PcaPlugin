@@ -149,7 +149,11 @@ void PCAPlugin::init()
     });
 
     // Register for points datasets events using a custom callback function
-    registerDataEventByType(PointType, std::bind(&PCAPlugin::onDataEvent, this, std::placeholders::_1));
+    //registerDataEventByType(PointType, std::bind(&PCAPlugin::onDataEvent, this, std::placeholders::_1));
+    _eventListener.setEventCore(Application::core());
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
+    _eventListener.registerDataEventByType(PointType, std::bind(&PCAPlugin::onDataEvent, this, std::placeholders::_1));
+
 }
 
 void PCAPlugin::onDataEvent(hdps::DataEvent* dataEvent)
