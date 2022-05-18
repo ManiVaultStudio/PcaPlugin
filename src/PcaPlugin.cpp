@@ -105,7 +105,7 @@ PCAPlugin::PCAPlugin(const PluginFactory* factory) :
 void PCAPlugin::init()
 {
     // Create example output dataset (a points dataset which is derived from the input points dataset) and set the output dataset
-    setOutputDataset(_core->createDerivedDataset("PCA", getInputDataset()));
+    setOutputDataset(_core->createDerivedDataset("PCA", getInputDataset(), getInputDataset()));
 
     // Retrieve the input dataset for our specific data type (in our case points)
     // The HDPS core sets the input dataset reference when the plugin is created
@@ -127,6 +127,12 @@ void PCAPlugin::init()
 
     // Automatically focus on the PCA action
     outputDataset->getDataHierarchyItem().select();
+
+    // Set initial data (default 2 dimensions, all points at (0,0) )
+    std::vector<float> initialData;
+    const auto numInitialDataDimensions = 2;
+    initialData.resize(inputDataset->getNumPoints() * numInitialDataDimensions);
+    outputDataset->setData(initialData.data(), inputDataset->getNumPoints(), numInitialDataDimensions);
 
     // Start the analysis when the user clicks the start analysis push button
     connect(&_settingsAction.getStartAnalysisAction(), &hdps::gui::TriggerAction::triggered, this, [&]() {
