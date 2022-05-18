@@ -4,7 +4,7 @@ SettingsAction::SettingsAction(QObject* parent) :
     GroupAction(parent, true),
     _pcaAlgorithmAction(this, "PCA alg"),
     _dataNormAction(this, "Data norm"),
-    _numberOfComponents(this, "Number of iterations"),
+    _numberOfComponents(this, "Number of PCA components"),
     _startAnalysisAction(this, "Start analysis")
 {
     setText("PCA");
