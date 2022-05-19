@@ -76,23 +76,27 @@ inline bool compStdAndStdMatrixAppr(const std::vector<T>& mat_a, const std::vect
 	return (m1.cwiseAbs() - m2.cwiseAbs()).isZero(eps);
 }
 
-void readBinaryToStdVector(const std::string fileName, std::vector<float>& data)
+bool readBinaryToStdVector(const std::string fileName, std::vector<float>& data)
 {
 	std::ifstream fin(fileName, std::ios::in | std::ios::binary);
+	
+	// check if files exists
 	if (!fin.is_open()) {
 		std::cout << "Unable to load file: " << fileName << std::endl;
+		return EXIT_FAILURE;
 	}
-	else {
-		// number of data points
-		fin.seekg(0, std::ios::end);
-		auto fileSize = fin.tellg();
-		auto numDataPoints = fileSize / sizeof(float);
-		fin.seekg(0, std::ios::beg);
 
-		// read data
-		data.clear();
-		data.resize(numDataPoints);
-		fin.read(reinterpret_cast<char*>(data.data()), fileSize);
-		fin.close();
-	}
+	// number of data points
+	fin.seekg(0, std::ios::end);
+	auto fileSize = fin.tellg();
+	auto numDataPoints = fileSize / sizeof(float);
+	fin.seekg(0, std::ios::beg);
+
+	// read data
+	data.clear();
+	data.resize(numDataPoints);
+	fin.read(reinterpret_cast<char*>(data.data()), fileSize);
+	fin.close();
+
+	return EXIT_SUCCESS;
 }

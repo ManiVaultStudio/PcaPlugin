@@ -11,7 +11,6 @@
 
 // see https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md#test-cases-and-sections
 
-
 const std::filesystem::path current_file_path = std::source_location::current().file_name();
 const std::filesystem::path dataDir = current_file_path.parent_path() / "data" / "";
 
@@ -20,7 +19,10 @@ TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]
 
 	const std::string fileName = dataDir.string() + "sklearn_data.bin";
 	std::vector<float> data_input;
-	readBinaryToStdVector(fileName, data_input);
+	auto readFileSucess = readBinaryToStdVector(fileName, data_input);
+
+	// check if data exists
+	REQUIRE(readFileSucess);
 
 	// read a JSON file
 	nlohmann::json data_info;
@@ -33,7 +35,7 @@ TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]
 	const size_t num_points = data_info.at("Data points");
 	const size_t num_dims = data_info.at("Dimensions");
 
-	// check of data set was loaded correctly
+	// check if data set was loaded correctly
 	REQUIRE(data_input.size() == num_points * num_dims);
 
 	SECTION("SKLEARN") {
@@ -118,7 +120,7 @@ TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]
 		std::vector<float> sklearn_trans_norm_mean;
 		readBinaryToStdVector(dataDir.string() + "sklearn_trans_norm_mean.bin", sklearn_trans_norm_mean);
 
-		// check of data set was loaded correctly
+		// check if data set was loaded correctly
 		//REQUIRE(sklearn_pca_norm_mean.size() == num_comp * num_dims);
 		REQUIRE(sklearn_data_norm_mean.size() == num_points * num_dims);
 		REQUIRE(sklearn_trans_norm_mean.size() == num_points * num_comp);
@@ -187,7 +189,10 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";
 	std::vector<float> data_in;
-	readBinaryToStdVector(fileName, data_in);
+	auto readFileSucess = readBinaryToStdVector(fileName, data_in);
+
+	// check if data exists
+	REQUIRE(readFileSucess);
 
 	// read a JSON file
 	nlohmann::json data_info;
@@ -200,7 +205,7 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 	const size_t num_points = data_info.at("Data points");
 	const size_t num_dims = data_info.at("Dimensions");
 
-	// check of data set was loaded correctly
+	// check if data set was loaded correctly
 	REQUIRE(data_in.size() == num_points * num_dims);
 
 	std::vector<float> principal_components_std;
@@ -297,7 +302,10 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MinMaxNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";
 	std::vector<float> data_in;
-	readBinaryToStdVector(fileName, data_in);
+	auto readFileSucess = readBinaryToStdVector(fileName, data_in);
+
+	// check if file exists
+	REQUIRE(readFileSucess);
 
 	// read a JSON file
 	nlohmann::json data_info;
@@ -310,7 +318,7 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MinMaxNorm]") {
 	const size_t num_points = data_info.at("Data points");
 	const size_t num_dims = data_info.at("Dimensions");
 
-	// check of data set was loaded correctly
+	// check if data set was loaded correctly
 	REQUIRE(data_in.size() == num_points * num_dims);
 
 	std::vector<float> principal_components_std;
@@ -407,7 +415,10 @@ TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";
 	std::vector<float> data_in;
-	readBinaryToStdVector(fileName, data_in);
+	auto readFileSucess = readBinaryToStdVector(fileName, data_in);
+
+	// check if file exists
+	REQUIRE(readFileSucess);
 
 	// read a JSON file
 	nlohmann::json data_info;
@@ -420,7 +431,7 @@ TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
 	const size_t num_points = data_info.at("Data points");
 	const size_t num_dims = data_info.at("Dimensions");
 
-	// check of data set was loaded correctly
+	// check if data set was loaded correctly
 	REQUIRE(data_in.size() == num_points * num_dims);
 
 	// convert std vec to Eigen MatrixXf
