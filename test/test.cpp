@@ -14,8 +14,10 @@
 const std::filesystem::path current_file_path = std::source_location::current().file_name();
 const std::filesystem::path dataDir = current_file_path.parent_path() / "data" / "";
 
+/// Sklearn example data
+/// Test with the example data from the sklearn documentation for their PCA implementation
+/// https://scikit-learn.org/1.1/modules/generated/sklearn.decomposition.PCA.html
 TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]") {
-	// https://scikit-learn.org/1.1/modules/generated/sklearn.decomposition.PCA.html
 
 	const std::string fileName = dataDir.string() + "sklearn_data.bin";
 	std::vector<float> data_input;
@@ -143,6 +145,8 @@ TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]
 
 }
 
+/// Toy data
+/// Test with some self-defined toy data
 TEST_CASE("Toy data", "[PCA][SVD][COV]") {
 
 	SECTION("TOY") {
@@ -185,6 +189,9 @@ TEST_CASE("Toy data", "[PCA][SVD][COV]") {
 
 }
 
+/// Sklearn iris data
+/// Test with the iris dataset from sklearn, data normalized with MinMaxNorm
+/// https://scikit-learn.org/1.1/modules/generated/sklearn.datasets.load_iris.html
 TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";
@@ -298,7 +305,10 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 }
 
-TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MinMaxNorm]") {
+/// Sklearn iris data
+/// Test with the iris dataset from sklearn, data normalized with MeanNorm
+/// https://scikit-learn.org/1.1/modules/generated/sklearn.datasets.load_iris.html
+TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MeanNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";
 	std::vector<float> data_in;
@@ -411,6 +421,9 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MinMaxNorm]") {
 
 }
 
+/// Sklearn iris data
+/// Test the data normalization implementation with the iris dataset from sklearn against a python implementation of the same norms
+/// https://scikit-learn.org/1.1/modules/generated/sklearn.datasets.load_iris.html
 TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";

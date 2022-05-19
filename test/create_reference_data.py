@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.datasets import load_digits, load_iris
+from sklearn.datasets import load_iris
 from sklearn.decomposition import PCA
 import os
 
