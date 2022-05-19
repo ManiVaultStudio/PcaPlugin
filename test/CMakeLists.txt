@@ -28,14 +28,14 @@ endif(MSVC)
 set(PCA_PLUGIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 # EIGEN3
-if(DEFINED ENV{EIGEN3_DIR})
-    set(EIGEN3_DIR $ENV{EIGEN3_DIR} CACHE PATH  "Path to Eigen3")
+if(DEFINED ENV{Eigen3_DIR})
+    set(Eigen3_DIR $ENV{Eigen3_DIR} CACHE PATH "Path to Eigen3")
 endif()
 
-find_package (Eigen3 3.4 REQUIRED NO_MODULE)
+find_package (Eigen3 3.4 REQUIRED NO_MODULE PATHS ${Eigen3_DIR})
 
-IF( ${EIGEN3_FOUND} )
-    MESSAGE( STATUS "Eigen3 found at ${EIGEN3_DIR}")
+IF( ${Eigen3_FOUND} )
+    MESSAGE( STATUS "Eigen3 found at ${Eigen3_DIR}")
 ENDIF()
 
 # CATCH2
@@ -43,7 +43,7 @@ if(DEFINED ENV{CATCH2_DIR})
     set(CATCH2_DIR $ENV{CATCH2_DIR} CACHE PATH  "Path to Catch2")
 endif()
 
-find_package(Catch2 3 REQUIRED PATH ${CATCH2_DIR})
+find_package(Catch2 3 REQUIRED PATHS ${CATCH2_DIR})
 
 IF( ${Catch2_FOUND} )
     MESSAGE( STATUS "Catch2 found at ${Catch2_DIR}")
@@ -54,7 +54,7 @@ if(DEFINED ENV{nlohmann_json_DIR})
     set(nlohmann_json_DIR $ENV{nlohmann_json_DIR} CACHE PATH  "Path to nlohmann_json")
 endif()
 
-find_package(nlohmann_json 3.2.0 REQUIRED ${nlohmann_json_DIR})
+find_package(nlohmann_json 3.2.0 REQUIRED PATHS ${nlohmann_json_DIR})
 
 IF( ${NLOHMANN_JSON_FOUND} )
     MESSAGE( STATUS "NLOHMANN_JSON found at ${nlohmann_json_DIR}")

@@ -41,14 +41,14 @@ message(STATUS "Install plugin to ${INSTALL_DIR}")
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 # EIGEN3
-if(DEFINED ENV{EIGEN3_DIR})
-    set(EIGEN3_DIR $ENV{EIGEN3_DIR} CACHE PATH  "Path to Eigen3")
+if(DEFINED ENV{Eigen3_DIR})
+    set(Eigen3_DIR $ENV{Eigen3_DIR} CACHE PATH "Path to Eigen3")
 endif()
 
-find_package (Eigen3 3.4 REQUIRED NO_MODULE)
+find_package (Eigen3 3.4 REQUIRED NO_MODULE PATHS ${Eigen3_DIR})
 
-IF( ${EIGEN3_FOUND} )
-    MESSAGE( STATUS "Eigen3 found at ${EIGEN3_DIR}")
+IF( ${Eigen3_FOUND} )
+    MESSAGE( STATUS "Eigen3 found at ${Eigen3_DIR}")
 ENDIF()
 
 
