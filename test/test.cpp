@@ -21,10 +21,10 @@ TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]
 
 	const std::string fileName = dataDir.string() + "sklearn_data.bin";
 	std::vector<float> data_input;
-	auto readFileSucess = readBinaryToStdVector(fileName, data_input);
+	int readFileSucess = readBinaryToStdVector(fileName, data_input);
 
 	// check if data exists
-	REQUIRE(readFileSucess);
+	REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 	// read a JSON file
 	nlohmann::json data_info;
@@ -196,10 +196,10 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";
 	std::vector<float> data_in;
-	auto readFileSucess = readBinaryToStdVector(fileName, data_in);
+	int readFileSucess = readBinaryToStdVector(fileName, data_in);
 
 	// check if data exists
-	REQUIRE(readFileSucess);
+	REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 	// read a JSON file
 	nlohmann::json data_info;
@@ -312,10 +312,10 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MeanNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";
 	std::vector<float> data_in;
-	auto readFileSucess = readBinaryToStdVector(fileName, data_in);
+	int readFileSucess = readBinaryToStdVector(fileName, data_in);
 
 	// check if file exists
-	REQUIRE(readFileSucess);
+	REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 	// read a JSON file
 	nlohmann::json data_info;
@@ -428,10 +428,10 @@ TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
 
 	const std::string fileName = dataDir.string() + "iris_data.bin";
 	std::vector<float> data_in;
-	auto readFileSucess = readBinaryToStdVector(fileName, data_in);
+	int readFileSucess = readBinaryToStdVector(fileName, data_in);
 
 	// check if file exists
-	REQUIRE(readFileSucess);
+	REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 	// read a JSON file
 	nlohmann::json data_info;
