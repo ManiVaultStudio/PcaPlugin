@@ -60,24 +60,27 @@ PCAWorker::PCAWorker() :
     _data(nullptr),
     _num_dims(0),
     _num_comps(0),
+    _std_orient(true),
     _algorithm(math::PCA_ALG::COV),
     _norm(math::DATA_NORM::NONE)
 {
 }
 
-PCAWorker::PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm) :
+PCAWorker::PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm, bool std_orient) :
     _data(data), 
     _num_dims(num_dims),
     _num_comps(num_comps), 
+    _std_orient(std_orient),
     _algorithm(algorithm),
     _norm(norm)
 {
 }
 
-void PCAWorker::setup(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm) {
+void PCAWorker::setup(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm, bool std_orient) {
     _data = data;
     _num_dims = num_dims;
     _num_comps = num_comps;
+    _std_orient = std_orient;
     _algorithm = algorithm;
     _norm = norm;
 }
@@ -85,7 +88,7 @@ void PCAWorker::setup(std::shared_ptr<std::vector<float>> data, size_t num_dims,
 void PCAWorker::compute() {
     utils::timer([&]() {
         math::pca(*_data, /* number of dimension = */ _num_dims, /* transformed PCA data = */ _pca_out, /* number of pca components = */ _num_comps,
-            /* pca algorithm = */ _algorithm, /* data normalization = */ _norm);
+            /* pca algorithm = */ _algorithm, /* data normalization = */ _norm, /* stdOrientation = */ _std_orient);
         },
         "PCA computation time (ms)");
 
@@ -198,11 +201,12 @@ void PCAPlugin::computePCA()
     // Get settings
     math::PCA_ALG alg = getPcaAlgorithm(_settingsAction.getPcaAlgorithmAction().getCurrentIndex());
     math::DATA_NORM norm = getDataNorm(_settingsAction.getDataNormAction().getCurrentIndex());
+    bool stdOrientation = _settingsAction.getStdAxisOrientation().isChecked();
 
     // Computat in different thread
     setTaskDescription("Computing...");
 
-    _pcaWorker.setup(std::make_shared<std::vector<float>>(data), dimensionIndices.size(), num_comps, alg, norm);
+    _pcaWorker.setup(std::make_shared<std::vector<float>>(data), dimensionIndices.size(), num_comps, alg, norm, stdOrientation);
 
     _workerThread = new QThread();
     _pcaWorker.moveToThread(_workerThread);
