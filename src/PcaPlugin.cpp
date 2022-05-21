@@ -2,6 +2,7 @@
 
 #include "PointData.h"
 #include "PCA.h"
+#include "Utils.h" 
 
 #include <QtCore>
 #include <QDebug>
@@ -57,6 +58,7 @@ math::DATA_NORM getDataNorm(size_t index) {
 /// ////////// ///
 PCAWorker::PCAWorker() :
     _data(nullptr),
+    _num_dims(0),
     _num_comps(0),
     _algorithm(math::PCA_ALG::COV),
     _norm(math::DATA_NORM::NONE)
@@ -81,8 +83,11 @@ void PCAWorker::setup(std::shared_ptr<std::vector<float>> data, size_t num_dims,
 }
 
 void PCAWorker::compute() {
-    math::pca(*_data, /* number of dimension = */ _num_dims, /* transformed PCA data = */ _pca_out, /* number of pca components = */ _num_comps,
-                      /* pca algorithm = */ _algorithm, /* data normalization = */ _norm);
+    utils::timer([&]() {
+        math::pca(*_data, /* number of dimension = */ _num_dims, /* transformed PCA data = */ _pca_out, /* number of pca components = */ _num_comps,
+            /* pca algorithm = */ _algorithm, /* data normalization = */ _norm);
+        },
+        "PCA computation time (ms)");
 
     emit resultReady();
 }

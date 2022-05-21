@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.17)
 # -----------------------------------------------------------------------------
 set(PCA_PLUGIN "PcaPlugin")
 
-PROJECT(${PCA_PLUGIN})
+PROJECT(${PCA_PLUGIN} CXX)
 
 # -----------------------------------------------------------------------------
 # Set cmake flags
@@ -20,6 +20,9 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
+
+# use cmake hardware checks
+include(CheckCXXCompilerFlag)
 
 # -----------------------------------------------------------------------------
 # Set install directory
@@ -51,6 +54,8 @@ IF( ${Eigen3_FOUND} )
     MESSAGE( STATUS "Eigen3 found at ${Eigen3_DIR}")
 ENDIF()
 
+# OpenMP
+find_package(OpenMP)
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -107,6 +112,47 @@ endif(MSVC)
 
 target_compile_definitions(${PCA_PLUGIN} PRIVATE QT_MESSAGELOGCONTEXT)
 
+# Instruction sets
+add_definitions(-DUSE_SSE)
+
+if(MSVC)
+	check_cxx_compiler_flag("/arch:AVX" COMPILER_OPT_AVX_SUPPORTED)
+	if(${COMPILER_OPT_AVX_SUPPORTED})
+		add_definitions(/arch:AVX)
+	endif()
+	
+	check_cxx_compiler_flag("/arch:AVX2" COMPILER_OPT_AVX2_SUPPORTED)
+	if(${COMPILER_OPT_AVX2_SUPPORTED})
+		add_definitions(/arch:AVX2)
+	endif()
+
+else()
+	check_cxx_compiler_flag("-DUSE_AVX" COMPILER_OPT_AVX_SUPPORTED)
+	if(${COMPILER_OPT_AVX_SUPPORTED})
+		add_definitions(-DUSE_AVX)
+	endif()
+	
+	check_cxx_compiler_flag("-DUSE_AVX2" COMPILER_OPT_AVX2_SUPPORTED)
+	if(${COMPILER_OPT_AVX2_SUPPORTED})
+		add_definitions(-DUSE_AVX2)
+	endif()
+
+endif()
+
+if(${COMPILER_OPT_AVX_SUPPORTED})
+	MESSAGE( STATUS "Use AXV")
+endif()
+if(${COMPILER_OPT_AVX2_SUPPORTED})
+	MESSAGE( STATUS "Use AXV2")
+endif()
+
+# Warning levels
+if(MSVC)
+  target_compile_options(${PCA_PLUGIN} PRIVATE /W3)
+else()
+  target_compile_options(${PCA_PLUGIN} PRIVATE -Wall)
+endif()
+
 # -----------------------------------------------------------------------------
 # Target installation
 # -----------------------------------------------------------------------------
@@ -115,7 +161,6 @@ add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
 	"$<TARGET_FILE:${PCA_PLUGIN}>"
 	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PCA_PLUGIN}>"
 )
-
 
 # -----------------------------------------------------------------------------
 # Unit testing
