@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>	// for info on testing see https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md#test-cases-and-sections
 #include <nlohmann/json.hpp>
 
 #include <fstream>
@@ -7,9 +7,9 @@
 #include <iostream>
 
 #include "PCA.h"
-#include "test_utils.h"
+#include "test_utils.h"		// namespace 
 
-// see https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md#test-cases-and-sections
+using namespace testing;
 
 const std::filesystem::path current_file_path = std::source_location::current().file_name();
 const std::filesystem::path dataDir = current_file_path.parent_path() / "data" / "";

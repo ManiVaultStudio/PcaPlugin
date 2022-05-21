@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <chrono>       // high_resolution_clock, milliseconds
 #include <execution>
 #include <iterator>     // std::forward_iterator_tag
 #include <cstddef>      // std::ptrdiff_t
@@ -8,6 +9,25 @@
 #include <typeinfo>
 
 namespace utils {
+
+    /// ////// ///
+    /// TIMING ///
+    /// ////// ///
+
+    // Call like:
+    /*
+    utils::timer([&]() {
+         <CODE YOU WANT TO TIME>
+        },
+        "<DESCRIPTION>");
+    */
+    template <typename F>
+    void timer(F myFunc, std::string name) {
+        using clock = std::chrono::high_resolution_clock;
+        const auto time_start = clock::now();
+        myFunc();
+        std::cout << "Timing " << name << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - time_start).count() << "ms" << std::endl;
+    }
 
     /// /////// ///
     /// Looping ///

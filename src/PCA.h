@@ -87,26 +87,25 @@ namespace math {
         return mat.rowwise() - mat.colwise().mean();
     }
 
-    // Sign correction to ensure deterministic output 
-    // Is in svd_flip from scikit-learn, https://github.com/scikit-learn/scikit-learn
+    // Sign correction to ensure deterministic output:
+    // flip each dimension such that the max abs value is positive
+    // Is similar to svd_flip from scikit-learn, https://github.com/scikit-learn/scikit-learn
     inline Eigen::MatrixXf standardOrientation(const Eigen::MatrixXf& mat)
     {
-        // rowwise: which column has the max abs value
+        // columnswise: which row has the max abs value
         // then get the sign of the max abs value
-        Eigen::VectorXf signs(mat.rows());
-        Eigen::VectorXf::Index colID;
-        for (unsigned int rowID = 0; rowID < mat.rows(); rowID++)
+        Eigen::VectorXf signs(mat.cols());
+        Eigen::VectorXf::Index rowID;
+        for (unsigned int colID = 0; colID < mat.cols(); colID++)
         {
-            mat.row(rowID).cwiseAbs().maxCoeff(&colID);
-            signs[rowID] = (mat(rowID, colID) >= 0) ? 1 : -1;
+            mat.col(colID).cwiseAbs().maxCoeff(&rowID);
+            signs[colID] = (mat(rowID, colID) >= 0) ? 1 : -1;
         }
 
-        //std::cout << mat << std::endl;
-        //std::cout << signs << std::endl;
-        //Eigen::MatrixXf test = mat.array().colwise() * signs.array(); // flip signs of rows
-        //std::cout << test << std::endl;
-        return mat.array().colwise() * signs.array();
+        // flip columns
+        return mat.array().rowwise() * signs.transpose().array();
     }
+
 
     /// /// ///
     /// PCA ///
@@ -254,7 +253,7 @@ namespace math {
         COV,    // Compute eigenvalues of covariance matrix of data, Eigen::SelfAdjointEigenSolver
     };
 
-    inline void pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, PCA_ALG algorithm = PCA_ALG::SVD, DATA_NORM norm = DATA_NORM::MINMAX)
+    inline void pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, PCA_ALG algorithm = PCA_ALG::SVD, DATA_NORM norm = DATA_NORM::MINMAX, bool stdOrientation = true)
     {
         // do not transform if data is 1d
         if (num_dims == 1)
@@ -301,8 +300,13 @@ namespace math {
         // project data
         Eigen::MatrixXf data_transformed = pcaTransform(data_normed, principal_components);
 
+        // enforce same orientation (flip axis) for all algorithms 
+        if (stdOrientation)
+            data_transformed = math::standardOrientation(data_transformed);
+
         // compute 2 pca components and convert to std vector with [p0d0, p0d1, ..., p1d0, p1d1, ..., pNd0, pNd1, ..., pNdM]
         pca_out = convertEigenMatrixToStdVector(data_transformed);
+
     }
 
 

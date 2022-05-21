@@ -31,9 +31,9 @@ class PCAWorker : public QObject
 
 public:
     PCAWorker();
-    PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm);
+    PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm, bool std_orient);
 
-    void setup(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm);
+    void setup(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm, bool std_orient);
 
     std::tuple<std::vector<float>&, size_t> getRestuls() { return { _pca_out, _num_comps }; }
 
@@ -47,6 +47,7 @@ private:
     std::shared_ptr<std::vector<float>> _data;
     size_t _num_dims;
     size_t _num_comps;
+    bool _std_orient;
     std::vector<float> _pca_out;
     math::PCA_ALG _algorithm;
     math::DATA_NORM _norm;
