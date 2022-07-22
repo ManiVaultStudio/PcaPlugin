@@ -41,7 +41,7 @@ message(STATUS "Install plugin to ${INSTALL_DIR}")
 # Dependencies
 # -----------------------------------------------------------------------------
 
-find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 # EIGEN3
 if(DEFINED ENV{Eigen3_DIR})
@@ -92,8 +92,8 @@ target_include_directories(${PCA_PLUGIN} PRIVATE "${HDPS_INSTALL_DIR}/$<CONFIGUR
 # Target library linking
 # -----------------------------------------------------------------------------
 
-target_link_libraries(${PCA_PLUGIN} PRIVATE Qt5::Widgets)
-target_link_libraries(${PCA_PLUGIN} PRIVATE Qt5::WebEngineWidgets)
+target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::Widgets)
+target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointData.lib")
 
