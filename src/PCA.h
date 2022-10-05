@@ -35,7 +35,7 @@ namespace math {
         return { mat.data(), mat.data() + mat.size() };
     }
 
-    Eigen::MatrixXf convertStdVectorToEigenMatrix(const std::vector<float>& data_in, size_t num_dims)
+    Eigen::MatrixXf convertStdVectorToEigenMatrix(const std::vector<float>& data_in, const size_t num_dims)
     {
         const size_t num_row = data_in.size() / num_dims;
         const size_t num_col = num_dims;
@@ -190,13 +190,8 @@ namespace math {
     }
 
     // data should be have column-wise zero empirical mean 
-    inline Eigen::MatrixXf pcaSVD(const Eigen::MatrixXf& data, size_t& num_comp)
+    inline Eigen::MatrixXf pcaSVD(const Eigen::MatrixXf& data, const size_t num_comp)
     {
-        const size_t num_row = data.rows();
-        const size_t num_col = data.cols();
-
-        checkNumComponents(num_row, num_col, num_comp);
-
         // compute svd
         Eigen::BDCSVD<Eigen::MatrixXf> svd(data, Eigen::ComputeFullV);
         svd.computeV();
@@ -210,12 +205,8 @@ namespace math {
     }
 
     // data should be have column-wise zero empirical mean 
-    inline Eigen::MatrixXf pcaCovMat(const Eigen::MatrixXf& data, size_t& num_comp) {
-        const size_t num_row = data.rows();
-        const size_t num_col = data.cols();
-
-        checkNumComponents(num_row, num_col, num_comp);
-
+    inline Eigen::MatrixXf pcaCovMat(const Eigen::MatrixXf& data, const size_t num_comp) 
+    {
         // covaraince matrix
         Eigen::MatrixXf covMat = data.transpose() * data;
 
@@ -253,10 +244,10 @@ namespace math {
         COV,    // Compute eigenvalues of covariance matrix of data, Eigen::SelfAdjointEigenSolver
     };
 
-    inline void pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, PCA_ALG algorithm = PCA_ALG::SVD, DATA_NORM norm = DATA_NORM::MINMAX, bool stdOrientation = true)
+    inline void pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, const PCA_ALG algorithm = PCA_ALG::SVD, const DATA_NORM norm = DATA_NORM::MINMAX, const bool stdOrientation = true)
     {
         // do not transform if data is 1d
-        if (num_dims == 1)
+        if (num_dims <= 1)
         {
             num_comp = num_dims;
             pca_out = data_in;
@@ -267,8 +258,14 @@ namespace math {
         // convert std vector to Eigen MatrixXf
         Eigen::MatrixXf data = convertStdVectorToEigenMatrix(data_in, num_dims);
 
-        assert(data.rows() * data.cols() == data_in.size());
-        assert(data.cols() == num_dims);
+        // check number of component against number of rows and columns
+        const size_t num_row = data.rows();
+        const size_t num_col = data.cols();
+        size_t _num_comp = num_comp;
+        checkNumComponents(num_row, num_col, _num_comp);
+
+        assert(num_row * num_col == data_in.size());
+        assert(num_col == num_dims);
 
         // choose which data normalization to use
         auto norm_data = [&](const Eigen::MatrixXf& dat) {
@@ -283,9 +280,9 @@ namespace math {
         // choose which pcaSVD algorithm to use 
         auto pca_alg = [&](const Eigen::MatrixXf& dat) {
             if (algorithm == PCA_ALG::SVD)
-                return pcaSVD(dat, num_comp);
+                return pcaSVD(dat, _num_comp);
             else // algorithm == PCA_ALG::COV
-                return pcaCovMat(dat, num_comp);
+                return pcaCovMat(dat, _num_comp);
         };
 
         // prep data: normalization
@@ -297,14 +294,14 @@ namespace math {
         // compute pcaSVD, get first num_comp components
         Eigen::MatrixXf principal_components = pca_alg(data_normed);
 
-        // project data
+        // project data, compute pca components and
         Eigen::MatrixXf data_transformed = pcaTransform(data_normed, principal_components);
 
         // enforce same orientation (flip axis) for all algorithms 
         if (stdOrientation)
             data_transformed = math::standardOrientation(data_transformed);
 
-        // compute 2 pca components and convert to std vector with [p0d0, p0d1, ..., p1d0, p1d1, ..., pNd0, pNd1, ..., pNdM]
+        // convert to std vector with [p0d0, p0d1, ..., p1d0, p1d1, ..., pNd0, pNd1, ..., pNdM]
         pca_out = convertEigenMatrixToStdVector(data_transformed);
 
     }
