@@ -121,11 +121,15 @@ public:
     ~PCAPluginFactory() override {}
 
     /** Returns the plugin icon */
-    QIcon getIcon() const override;
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /** Creates an instance of the example analysis plugin */
     AnalysisPlugin* produce() override;
 
-    /** Returns the data types that are supported by the example analysis plugin */
-    hdps::DataTypes supportedDataTypes() const override;
+    /**
+     * Get plugin trigger actions given \p datasets
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
+     */
+    PluginTriggerActions getPluginTriggerActions(const hdps::Datasets& datasets) const override;
 };

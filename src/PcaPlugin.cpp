@@ -4,6 +4,8 @@
 #include "PCA.h"
 #include "Utils.h" 
 
+#include <actions/PluginTriggerAction.h>
+
 #include <QtCore>
 #include <QDebug>
 
@@ -234,7 +236,7 @@ void PCAPlugin::getDataFromCore(std::vector<float>& data, std::vector<unsigned i
 
     data.resize((inputPoints->isFull() ? inputPoints->getNumPoints() : inputPoints->indices.size()) * numEnabledDimensions);
 
-    for (int i = 0; i < inputPoints->getNumDimensions(); i++)
+    for (uint32_t i = 0; i < inputPoints->getNumDimensions(); i++)
         if (enabledDimensions[i])
             dimensionIndices.push_back(i);
 
@@ -245,12 +247,12 @@ void PCAPlugin::setPCADataInCore(std::vector<float>& data, size_t num_components
 {
     auto outputDataset = getOutputDataset<Points>();
 
-    outputDataset->setData(data, num_components);
+    outputDataset->setData(data.data(), getInputDataset<Points>()->getNumPoints(), num_components);
 
     _core->notifyDatasetChanged(outputDataset);
 }
 
-QIcon PCAPluginFactory::getIcon() const
+QIcon PCAPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return Application::getIconFont("FontAwesome").getIcon("braille");
 }
@@ -261,12 +263,26 @@ AnalysisPlugin* PCAPluginFactory::produce()
     return new PCAPlugin(this);
 }
 
-hdps::DataTypes PCAPluginFactory::supportedDataTypes() const
+PluginTriggerActions PCAPluginFactory::getPluginTriggerActions(const hdps::Datasets& datasets) const
 {
-    DataTypes supportedTypes;
+    PluginTriggerActions pluginTriggerActions;
 
-    // This example analysis plugin is compatible with points datasets
-    supportedTypes.append(PointType);
+    const auto getPluginInstance = [this](const Dataset<Points>& dataset) -> PCAPlugin* {
+        return dynamic_cast<PCAPlugin*>(Application::core()->requestPlugin(getKind(), { dataset }));
+    };
 
-    return supportedTypes;
+    if (PluginFactory::areAllDatasetsOfTheSameType(datasets, PointType)) {
+        if (datasets.count() >= 1) {
+            auto pluginTriggerAction = createPluginTriggerAction("PCA", "Perform a principle component analysis on the selected datasets", datasets);
+
+            connect(pluginTriggerAction, &QAction::triggered, [this, getPluginInstance, datasets]() -> void {
+                for (auto dataset : datasets)
+                    getPluginInstance(dataset);
+                });
+
+            pluginTriggerActions << pluginTriggerAction;
+        }
+    }
+
+    return pluginTriggerActions;
 }
