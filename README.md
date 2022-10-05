@@ -12,3 +12,6 @@ This plugin implements two PCA computation algorithms: Explicitly computing the 
 
 ## Testing
 You can perform unit tests, see `test/README.md` (there are more dependencies). Set the cmake variable UNIT_TESTS to build tests.
+
+## TODO
+- Use vcpkg to manage dependencies
