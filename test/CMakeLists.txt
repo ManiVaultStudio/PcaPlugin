@@ -28,14 +28,12 @@ endif(MSVC)
 set(PCA_PLUGIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 # EIGEN3
-if(DEFINED ENV{Eigen3_DIR})
-    set(Eigen3_DIR $ENV{Eigen3_DIR} CACHE PATH "Path to Eigen3")
-endif()
+set(Eigen3_DIR "${PCA_PLUGIN_DIR}/third_party/eigen")
 
-find_package (Eigen3 3.4 REQUIRED NO_MODULE PATHS ${Eigen3_DIR})
-
-IF( ${Eigen3_FOUND} )
+IF( EXISTS "${Eigen3_DIR}/CMakeLists.txt" )
     MESSAGE( STATUS "Eigen3 found at ${Eigen3_DIR}")
+ELSE()
+	MESSAGE( FATAL_ERROR "Eigen3 not found")
 ENDIF()
 
 # CATCH2
@@ -84,13 +82,15 @@ add_executable(${PCA_TESTS} ${SOURCES})
 # Include pca 
 target_include_directories(${PCA_TESTS} PRIVATE "${PCA_PLUGIN_DIR}/src")
 
+# Include eigen headers 
+target_include_directories(${PCA_TESTS} PRIVATE ${Eigen3_DIR})
+
 # -----------------------------------------------------------------------------
 # Target link directories
 # -----------------------------------------------------------------------------
 # linking against catch will add the proper include path
 target_link_libraries(${PCA_TESTS} PRIVATE Catch2::Catch2WithMain)
 
-target_link_libraries(${PCA_TESTS} PRIVATE Eigen3::Eigen)
 target_link_libraries(${PCA_TESTS} PRIVATE nlohmann_json::nlohmann_json)
 
 # -----------------------------------------------------------------------------

@@ -41,21 +41,27 @@ message(STATUS "Install plugin to ${INSTALL_DIR}")
 # Dependencies
 # -----------------------------------------------------------------------------
 
-find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
-
-# EIGEN3
-if(DEFINED ENV{Eigen3_DIR})
-    set(Eigen3_DIR $ENV{Eigen3_DIR} CACHE PATH "Path to Eigen3")
-endif()
-
-find_package (Eigen3 3.4 REQUIRED NO_MODULE PATHS ${Eigen3_DIR})
-
-IF( ${Eigen3_FOUND} )
-    MESSAGE( STATUS "Eigen3 found at ${Eigen3_DIR}")
-ENDIF()
+# Qt6
+find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 # OpenMP
 find_package(OpenMP)
+
+# EIGEN3
+#if(DEFINED ENV{Eigen3_DIR})
+#    set(Eigen3_DIR $ENV{Eigen3_DIR} CACHE PATH "Path to Eigen3")
+#endif()
+
+#find_package (Eigen3 3.4 REQUIRED NO_MODULE PATHS ${Eigen3_DIR})
+
+set(Eigen3_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/eigen")
+
+IF( EXISTS "${Eigen3_DIR}/CMakeLists.txt" )
+    MESSAGE( STATUS "Eigen3 found at ${Eigen3_DIR}")
+ELSE()
+	MESSAGE( FATAL_ERROR "Eigen3 not found")
+ENDIF()
+
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -87,6 +93,7 @@ add_library(${PCA_PLUGIN} SHARED ${SOURCES})
 
 # Include HDPS core headers
 target_include_directories(${PCA_PLUGIN} PRIVATE "${HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${PCA_PLUGIN} PRIVATE ${Eigen3_DIR})
 
 # -----------------------------------------------------------------------------
 # Target library linking
@@ -96,8 +103,6 @@ target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointData.lib")
-
-target_link_libraries(${PCA_PLUGIN} PRIVATE Eigen3::Eigen)
 
 # -----------------------------------------------------------------------------
 # Target properties
