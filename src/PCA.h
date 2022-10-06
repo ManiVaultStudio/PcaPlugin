@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <limits>
 #include <assert.h>
 
 #include <omp.h>
@@ -58,6 +59,10 @@ namespace math {
         const size_t num_row = data_in.size() / num_dims;
         const size_t num_col = num_dims;
 
+        // omp on visual studio can only handle signed integers
+        if (num_row > std::numeric_limits<uint32_t>::max())
+            std::cerr << "PCA::convertStdVectorToEigenMatrix can only handle data with up to std::numeric_limits<uint32_t>::max() points" << std::endl;
+
         // convert std vector to Eigen MatrixXf
         // each row in MatrixXf corresponds to one data point
         Eigen::MatrixXf data(num_row, num_col);     	// num_rows (data points), num_cols (attributes)
@@ -67,10 +72,10 @@ namespace math {
 #pragma omp parallel for
 #endif NDEBUG
         // loop over data points
-        for(uint32_t point = 0; point < num_row; point++)
+        for(int32_t point = 0; point < static_cast<int32_t>(num_row); point++)
         {
             // loop over data point values
-            for (uint32_t dim = 0; dim < num_col; dim++)
+            for (size_t dim = 0; dim < num_col; dim++)
                 data(point, dim) = data_in[point* num_dims + dim];
         }
 
@@ -124,22 +129,22 @@ namespace math {
 
     inline void _normToCol(const Eigen::VectorXf& normFacs, Eigen::MatrixXf& mat)
     {
-        const size_t num_row = mat.rows();
-        const size_t num_col = mat.cols();
+        const int32_t num_row = static_cast<int32_t>(mat.rows());
+        const int32_t num_col = static_cast<int32_t>(mat.cols());
 
         // divide all values in mat.col(i) by normFacs[i]
         // return mat_norm.array().rowwise() / normFacs.transpose().array();
 
         // the previous lines don't seem to work, but the following does
         // there is probably a more elegant way of doing this
-        for (size_t col = 0; col < num_col; col++)
+        for (int32_t col = 0; col < num_col; col++)
         {
             if (normFacs[col] < 0.0001f) continue;
 
 #ifndef NDEBUG
 #pragma omp parallel for
 #endif NDEBUG
-            for (size_t row = 0; row < num_row; row++)
+            for (int32_t row = 0; row < static_cast<int32_t>(num_row); row++)
             {
                 mat(row, col) /= normFacs[col];
             }

@@ -137,12 +137,20 @@ void PCAPlugin::init()
     // Automatically focus on the PCA action
     outputDataset->getDataHierarchyItem().select();
 
+    const size_t numPoints = inputDataset->getNumPoints();
+
     // Set initial data (default 2 dimensions, all points at (0,0) )
     std::vector<float> initialData;
     const auto numInitialDataDimensions = 2;
-    initialData.resize(inputDataset->getNumPoints() * numInitialDataDimensions);
+    initialData.resize(numPoints * numInitialDataDimensions);
     outputDataset->setData(initialData.data(), inputDataset->getNumPoints(), numInitialDataDimensions);
     _core->notifyDatasetChanged(outputDataset);
+
+    if (numPoints > std::numeric_limits<uint32_t>::max())
+    {
+        std::cerr << "PCA: can only handle data with up to std::numeric_limits<uint32_t>::max() points" << std::endl;
+        _settingsAction.getStartAnalysisAction().setDisabled(true);
+    }
 
     // Start the analysis when the user clicks the start analysis push button
     connect(&_settingsAction.getStartAnalysisAction(), &hdps::gui::TriggerAction::triggered, this, [&]() {
