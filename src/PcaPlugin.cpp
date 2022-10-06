@@ -137,7 +137,7 @@ void PCAPlugin::init()
     // Automatically focus on the PCA action
     outputDataset->getDataHierarchyItem().select();
 
-    const size_t numPoints = inputDataset->getNumPoints();
+    const auto numPoints = inputDataset->getNumPoints();
 
     // Set initial data (default 2 dimensions, all points at (0,0) )
     std::vector<float> initialData;
@@ -146,7 +146,7 @@ void PCAPlugin::init()
     outputDataset->setData(initialData.data(), inputDataset->getNumPoints(), numInitialDataDimensions);
     _core->notifyDatasetChanged(outputDataset);
 
-    if (numPoints > std::numeric_limits<uint32_t>::max())
+    if (numPoints > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
     {
         std::cerr << "PCA: can only handle data with up to std::numeric_limits<uint32_t>::max() points" << std::endl;
         _settingsAction.getStartAnalysisAction().setDisabled(true);

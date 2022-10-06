@@ -60,7 +60,7 @@ namespace math {
         const size_t num_col = num_dims;
 
         // omp on visual studio can only handle signed integers
-        if (num_row > std::numeric_limits<uint32_t>::max())
+        if (num_row > static_cast<size_t>(std::numeric_limits<int32_t>::max()))
             std::cerr << "PCA::convertStdVectorToEigenMatrix can only handle data with up to std::numeric_limits<uint32_t>::max() points" << std::endl;
 
         // convert std vector to Eigen MatrixXf
