@@ -2,11 +2,11 @@
 #define UTILS_H
 
 #include <chrono>       // high_resolution_clock, milliseconds
-#include <execution>
 #include <iterator>     // std::forward_iterator_tag
 #include <cstddef>      // std::ptrdiff_t
 #include <type_traits>
 #include <typeinfo>
+#include <iostream>
 
 namespace utils {
 

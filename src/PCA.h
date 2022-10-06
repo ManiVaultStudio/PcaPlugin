@@ -1,13 +1,9 @@
 #ifndef PCA_H
 #define PCA_H
 
-#include <cmath>        // sqrt, sin, cos
-#include <numeric>      // accumulate
 #include <algorithm>    // for_each, max
-#include <execution>
+#include <execution>    // par_unseq
 #include <vector>
-#include <random>       // random_device, mt19937, uniform_real_distribution
-#include <chrono>       // high_resolution_clock, milliseconds
 #include <string>
 #include <iostream>
 
