@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.17)
 # -----------------------------------------------------------------------------
 set(PCA_PLUGIN "PcaPlugin")
 
-PROJECT(${PCA_PLUGIN} CXX)
+PROJECT(${PCA_PLUGIN} C CXX)
 
 # -----------------------------------------------------------------------------
 # Set cmake flags
@@ -74,7 +74,6 @@ set(SOURCES
     src/SettingsAction.cpp
     src/PcaPlugin.json
 	src/PCA.h
-	src/Utils.h
 	src/DimensionSelectionAction.h
 	src/DimensionSelectionAction.cpp
 )
@@ -103,7 +102,7 @@ target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointData.lib")
-
+target_link_libraries(${PCA_PLUGIN} PRIVATE OpenMP::OpenMP_CXX)
 # -----------------------------------------------------------------------------
 # Target properties
 # -----------------------------------------------------------------------------

@@ -1,15 +1,35 @@
 #ifndef PCA_H
 #define PCA_H
 
-#include <algorithm>    // for_each, max
-#include <execution>    // par_unseq
+#include <chrono>
 #include <vector>
 #include <string>
 #include <iostream>
+#include <assert.h>
 
 #include "Eigen/Dense"
 
-#include "Utils.h"
+namespace utils {
+
+    /// ////// ///
+    /// TIMING ///
+    /// ////// ///
+
+    // Call like:
+    /*
+    utils::timer([&]() {
+         <CODE YOU WANT TO TIME>
+        },
+        "<DESCRIPTION>");
+    */
+    template <typename F>
+    void timer(F myFunc, std::string name) {
+        using clock = std::chrono::high_resolution_clock;
+        const auto time_start = clock::now();
+        myFunc();
+        std::cout << "Timing " << name << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - time_start).count() << "ms" << std::endl;
+    }
+}
 
 namespace math {
 
@@ -40,23 +60,21 @@ namespace math {
         // each row in MatrixXf corresponds to one data point
         Eigen::MatrixXf data(num_row, num_col);     	// num_rows (data points), num_cols (attributes)
 
-        auto point_range = utils::pyrange(num_row);
-        auto dim_range = utils::pyrange(num_col);
-
-        std::for_each(std::execution::par_unseq, point_range.begin(), point_range.end(), [&](const auto point)
-            {// loop over data points
-
-                std::for_each(dim_range.begin(), dim_range.end(), [&](const auto dim)
-                    {// loop over data point values
-                        data(point, dim) = data_in[point* num_dims + dim];
-                    }
-                );
-            }
-        );
+        // copy data from vector to matrix
+#ifndef NDEBUG
+#pragma omp parallel for
+#endif NDEBUG
+        // loop over data points
+        for(uint32_t point = 0; point < num_row; point++)
+        {
+            // loop over data point values
+            for (uint32_t dim = 0; dim < num_col; dim++)
+                data(point, dim) = data_in[point* num_dims + dim];
+        }
 
         // this would be more concise but only works if data_in is not const
         // Also, I didn't test this
-        //Eigen::MatrixXf weights = Eigen::Map<Eigen::MatrixXf>(&data_in[0], num_row, num_col);
+        //Eigen::MatrixXf data = Eigen::Map<Eigen::MatrixXf>(&data_in[0], num_row, num_col);
 
         return data;
     }
@@ -102,6 +120,63 @@ namespace math {
         return mat.array().rowwise() * signs.transpose().array();
     }
 
+    inline void _normToCol(const Eigen::VectorXf& normFacs, Eigen::MatrixXf& mat)
+    {
+        const size_t num_row = mat.rows();
+        const size_t num_col = mat.cols();
+
+        // divide all values in mat.col(i) by normFacs[i]
+        // return mat_norm.array().rowwise() / normFacs.transpose().array();
+
+        // the previous lines don't seem to work, but the following does
+        // there is probably a more elegant way of doing this
+        for (size_t col = 0; col < num_col; col++)
+        {
+            if (normFacs[col] < 0.0001f) continue;
+
+#ifndef NDEBUG
+#pragma omp parallel for
+#endif NDEBUG
+            for (size_t row = 0; row < num_row; row++)
+            {
+                mat(row, col) /= normFacs[col];
+            }
+        }
+
+    }
+
+    // https://en.wikipedia.org/wiki/Feature_scaling#Mean_normalization
+    inline Eigen::MatrixXf meanNormalization(const Eigen::MatrixXf& mat)
+    {
+        // center around mean per attribute
+        Eigen::MatrixXf mat_norm = colwiseZeroMean(mat);
+
+        // compute with (max - min) factors
+        Eigen::VectorXf normFacs = mat.colwise().maxCoeff() - mat.colwise().minCoeff();
+
+        // norm with (max - min) factors:
+        _normToCol(normFacs, mat_norm);
+
+        return mat_norm;
+    }
+
+    // map each column to [0,1]
+    // https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
+    inline Eigen::MatrixXf minMaxNormalization(const Eigen::MatrixXf& mat)
+    {
+        // compute norm factors
+        Eigen::VectorXf minVals = mat.colwise().minCoeff();
+        Eigen::VectorXf normFacs = mat.colwise().maxCoeff().transpose() - minVals;
+
+        // shift all values
+        Eigen::MatrixXf mat_norm = mat.rowwise() - minVals.transpose();
+
+        // norm
+        _normToCol(normFacs, mat_norm);
+
+        return mat_norm;
+    }
+
 
     /// /// ///
     /// PCA ///
@@ -120,69 +195,6 @@ namespace math {
             std::cout << "pca: num_comp must larger than 0. Setting num_comp = min(num_row, num_col)";
             num_comp = std::min(num_row, num_col);
         }
-    }
-
-    // https://en.wikipedia.org/wiki/Feature_scaling#Mean_normalization
-    inline Eigen::MatrixXf meanNormalization(const Eigen::MatrixXf& mat)
-    {
-        const size_t num_row = mat.rows();
-        const size_t num_col = mat.cols();
-
-        // center around mean per attribute
-        Eigen::MatrixXf mat_norm = colwiseZeroMean(mat);
-
-        // norm with (max - min) attributes
-        Eigen::VectorXf normFacs = mat.colwise().maxCoeff() - mat.colwise().minCoeff();
-
-        // norm with (max - min) attributes:
-        // divide all values in mat.col(i) by normFacs[i]
-        //return mat_norm.array().rowwise() / normFacs.transpose().array();
-
-        // the previous lines don't seem to work, this does:
-        for (size_t col = 0; col < num_col; col++)
-        {
-            if (normFacs[col] < 0.0001f) continue;
-            auto row_range = utils::pyrange(num_row);
-            std::for_each(std::execution::par_unseq, row_range.begin(), row_range.end(), [&](const auto row)
-                {
-                    mat_norm(row, col) /= normFacs[col];
-                }
-            );
-        } // there is probably a more elegant way of doing this
-
-        return mat_norm;
-    }
-
-    // map each column to [0,1]
-    // https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
-    inline Eigen::MatrixXf minMaxNormalization(const Eigen::MatrixXf& mat)
-    {
-        const size_t num_row = mat.rows();
-        const size_t num_col = mat.cols();
-
-        Eigen::VectorXf minVals = mat.colwise().minCoeff();
-        Eigen::VectorXf normFacs = mat.colwise().maxCoeff().transpose() - minVals;
-
-        // shift all values
-        Eigen::MatrixXf mat_norm = mat.rowwise() - minVals.transpose();
-
-        // norm with (max - min) attributes:
-        // divide all values in mat.col(i) by normFacs[i]
-        //return mat_norm.array().rowwise() / normFacs.transpose().array();
-
-         // the previous lines don't seem to work, this does:
-        for (size_t col = 0; col < num_col; col++)
-        {
-            if (normFacs[col] < 0.0001f) continue;
-            auto row_range = utils::pyrange(num_row);
-            std::for_each(std::execution::par_unseq, row_range.begin(), row_range.end(), [&](const auto row)
-                {
-                    mat_norm(row, col) /= normFacs[col];
-                }
-            );
-        } // there is probably a more elegant way of doing this
-
-        return mat_norm;
     }
 
     // data should be have column-wise zero empirical mean 
