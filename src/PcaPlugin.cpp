@@ -143,6 +143,7 @@ void PCAPlugin::init()
     const auto numInitialDataDimensions = 2;
     initialData.resize(inputDataset->getNumPoints() * numInitialDataDimensions);
     outputDataset->setData(initialData.data(), inputDataset->getNumPoints(), numInitialDataDimensions);
+    _core->notifyDatasetChanged(outputDataset);
 
     // Start the analysis when the user clicks the start analysis push button
     connect(&_settingsAction.getStartAnalysisAction(), &hdps::gui::TriggerAction::triggered, this, [&]() {
