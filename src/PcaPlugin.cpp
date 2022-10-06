@@ -165,22 +165,10 @@ void PCAPlugin::init()
         std::cout << "PCA Plugin: Finished." << std::endl;
     });
 
-    // Register for points datasets events using a custom callback function
-    _eventListener.setEventCore(Application::core());
-
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
-    _eventListener.registerDataEventByType(PointType, std::bind(&PCAPlugin::onDataEvent, this, std::placeholders::_1));
-}
-
-void PCAPlugin::onDataEvent(hdps::DataEvent* dataEvent)
-{
-
-    if (dataEvent->getType() == EventType::DataChanged)
-    {
-        if (dataEvent->getDataset() == getInputDataset())
-            _dimensionSelectionAction.getPickerAction().setPointsDataset(dataEvent->getDataset<Points>());
-    }
-
+    // Update dimension selection with new data
+    connect(&inputDataset, &Dataset<Points>::dataChanged, this, [this, inputDataset]() {
+        _dimensionSelectionAction.getPickerAction().setPointsDataset(inputDataset);
+        });
 }
 
 
@@ -228,28 +216,27 @@ void PCAPlugin::computePCA()
 
 void PCAPlugin::getDataFromCore(std::vector<float>& data, std::vector<unsigned int>& dimensionIndices)
 {
-    auto inputPoints = getInputDataset<Points>();
-
     // Extract the enabled dimensions from the data
     std::vector<bool> enabledDimensions = _dimensionSelectionAction.getPickerAction().getEnabledDimensions();
-
     const auto numEnabledDimensions = count_if(enabledDimensions.begin(), enabledDimensions.end(), [](bool b) { return b; });
 
+    // Get input data set
+    auto inputPoints = getInputDataset<Points>();
     data.resize((inputPoints->isFull() ? inputPoints->getNumPoints() : inputPoints->indices.size()) * numEnabledDimensions);
 
+    // populate dimensionIndices
     for (uint32_t i = 0; i < inputPoints->getNumDimensions(); i++)
         if (enabledDimensions[i])
             dimensionIndices.push_back(i);
 
+    // populate data
     inputPoints->populateDataForDimensions<std::vector<float>, std::vector<unsigned int>>(data, dimensionIndices);
 }
 
 void PCAPlugin::setPCADataInCore(std::vector<float>& data, size_t num_components)
 {
     auto outputDataset = getOutputDataset<Points>();
-
     outputDataset->setData(data.data(), getInputDataset<Points>()->getNumPoints(), num_components);
-
     _core->notifyDatasetChanged(outputDataset);
 }
 

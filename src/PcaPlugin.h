@@ -72,19 +72,8 @@ public:
     /** Destructor */
     ~PCAPlugin() override = default;
 
-    /**
-     * This function is called by the core after the analysis plugin has been created
-     *
-     * Typical implementations of this function focus on the generation of output data
-     * and responding to events which are sent by the core.
-    */
+    /* This function is called by the core after the analysis plugin has been created, sets up init data */
     void init() override;
-
-    /**
-     * Invoked when a points data event occurs
-     * @param dataEvent Data event which occurred
-     */
-    void onDataEvent(hdps::DataEvent* dataEvent);
 
 signals:
     void startPCA();
@@ -98,8 +87,8 @@ private:
     SettingsAction              _settingsAction;            /** General PCA settings */
     DimensionSelectionAction    _dimensionSelectionAction;  /** Dimension selection */
 
-    PCAWorker                   _pcaWorker;
-    QThread*                    _workerThread;
+    PCAWorker                   _pcaWorker;                 /** Worker that computes PCA in another thread */
+    QThread*                    _workerThread;              /** Thread for PCA computation */
 };
 
 /// ////////////// ///
