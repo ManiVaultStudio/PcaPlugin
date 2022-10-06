@@ -7,6 +7,8 @@
 #include <iostream>
 #include <assert.h>
 
+#include <omp.h>
+
 #include "Eigen/Dense"
 
 namespace utils {
