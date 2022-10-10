@@ -97,11 +97,16 @@ target_include_directories(${PCA_PLUGIN} PRIVATE ${Eigen3_DIR})
 # -----------------------------------------------------------------------------
 # Target library linking
 # -----------------------------------------------------------------------------
+if(MSVC)
+    set(LIB_SUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+else()
+    set(LIB_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
 
 target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
-target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointData.lib")
+target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_SUFFIX}")
+target_link_libraries(${PCA_PLUGIN} PRIVATE "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_SUFFIX}")
 target_link_libraries(${PCA_PLUGIN} PRIVATE OpenMP::OpenMP_CXX)
 # -----------------------------------------------------------------------------
 # Target properties
