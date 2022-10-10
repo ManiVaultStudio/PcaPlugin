@@ -20,7 +20,7 @@ class PcaPluginConan(ConanFile):
     name = "PcaPlugin"
     description = "Compute principle components"
     topics = ("hdps", "plugin", "data", "pca")
-    url = "https://github.com/hdps/PointDataConversionPlugin"
+    url = "https://github.com/hdps/PcaPlugin"
     author = "B. van Lew b.van_lew@lumc.nl"  # conan recipe author
     license = "MIT"  # conan recipe license
 
@@ -34,7 +34,7 @@ class PcaPluginConan(ConanFile):
 
     scm = {
         "type": "git",
-        "subfolder": "hdps/PointDataConversionPlugin",
+        "subfolder": "hdps/PcaPlugin",
         "url": "auto",
         "revision": "auto",
     }
@@ -95,7 +95,7 @@ class PcaPluginConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder="hdps/PointDataConversionPlugin")
+        cmake.configure(build_script_folder="hdps/PcaPlugin")
         cmake.verbose = True
         return cmake
 
