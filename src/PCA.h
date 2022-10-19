@@ -208,15 +208,9 @@ namespace math {
     inline Eigen::MatrixXf pcaSVD(const Eigen::MatrixXf& data, const size_t num_comp)
     {
         // compute svd
-        Eigen::BDCSVD<Eigen::MatrixXf> svd(data, Eigen::ComputeFullV);
-        svd.computeV();
+        Eigen::BDCSVD<Eigen::MatrixXf> svd(data, Eigen::ComputeThinV);
 
-        // this is equivalent to:
-        // Eigen::MatrixXf v = svd.matrixV();
-        // Eigen::MatrixXf v_comps = v(Eigen::all, Eigen::seq(0, num_comp - 1));
-        // return v_comps;
         return svd.matrixV()(Eigen::all, Eigen::seq(0, num_comp - 1));
-
     }
 
     // data should be have column-wise zero empirical mean 
