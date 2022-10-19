@@ -106,8 +106,8 @@ PCAPlugin::PCAPlugin(const PluginFactory* factory) :
     AnalysisPlugin(factory),
     _settingsAction(this),
     _dimensionSelectionAction(this),
-    _pcaWorker(),
-    _workerThread(nullptr)
+    _pcaWorker(nullptr),
+    _workerThread()
 {
     qRegisterMetaType<std::vector<float>>();
 }
@@ -158,37 +158,18 @@ void PCAPlugin::init()
         computePCA();
     });
 
-    connect(&_pcaWorker, &PCAWorker::resultReady, this, [&](int32_t pca_status) {
-        auto [pca_out, num_comps] = _pcaWorker.getRestuls();
-
-        // Publish pca to core
-        setPCADataInCore(pca_out, num_comps);
-
-        // Flag the analysis task as finished
-        if(pca_status == EXIT_SUCCESS)
-            setTaskFinished();
-        else
-        {
-            setTaskAborted();
-            setTaskDescription("Computation failed");
-        }
-
-        // Enabled action again
-        _settingsAction.getStartAnalysisAction().setEnabled(true);
-
-        std::cout << "PCA Plugin: Finished." << std::endl;
-    });
-
     // Update dimension selection with new data
     connect(&inputDataset, &Dataset<Points>::dataChanged, this, [this, inputDataset]() {
         _dimensionSelectionAction.getPickerAction().setPointsDataset(inputDataset);
         });
 }
 
-
 void PCAPlugin::computePCA()
 {
     std::cout << "PCA Plugin: Started." << std::endl;
+
+    if (_pcaWorker)
+        _pcaWorker->deleteLater();
 
     // Disable actions during analysis
     _settingsAction.getStartAnalysisAction().setEnabled(false);
@@ -213,16 +194,39 @@ void PCAPlugin::computePCA()
     // Computat in different thread
     setTaskDescription("Computing...");
 
-    _pcaWorker.setup(std::make_shared<std::vector<float>>(data), dimensionIndices.size(), num_comps, alg, norm, stdOrientation);
+    _pcaWorker = new PCAWorker();
+    _pcaWorker->setup(std::make_shared<std::vector<float>>(data), dimensionIndices.size(), num_comps, alg, norm, stdOrientation);
 
-    _workerThread = new QThread();
-    _pcaWorker.moveToThread(_workerThread);
+    _pcaWorker->moveToThread(&_workerThread);
 
-    connect(_workerThread, &QThread::finished, _workerThread, &QObject::deleteLater);   // delete thread after work is done
-    connect(this, &PCAPlugin::startPCA, &_pcaWorker, &PCAWorker::compute);              // setup pca computation 
+    // setup pca computation 
+    connect(this, &PCAPlugin::startPCA, _pcaWorker, &PCAWorker::compute);               
+
+    // get results from PCA
+    connect(_pcaWorker, &PCAWorker::resultReady, this, [&](int32_t pca_status) {
+        auto [pca_out, num_comps] = _pcaWorker->getRestuls();
+
+        // Publish pca to core
+        setPCADataInCore(pca_out, num_comps);
+
+        // Flag the analysis task as finished
+        if (pca_status == EXIT_SUCCESS)
+            setTaskFinished();
+        else
+        {
+            setTaskAborted();
+            setTaskDescription("Computation failed");
+        }
+
+        // Enabled action again
+        _settingsAction.getStartAnalysisAction().setEnabled(true);
+
+        std::cout << "PCA Plugin: Finished." << std::endl;
+        });
+
 
     std::cout << "PCA Plugin: Starting computing PCA transformation with " << num_comps << " components (settings: alg " << static_cast<int>(alg) << ", norm " << static_cast<int>(norm) << ")" << std::endl;
-    _workerThread->start();
+    _workerThread.start();
     // once finished _pcaWorker will call a lamda defined in this->init() that publishes the PCA
     emit startPCA();
 }

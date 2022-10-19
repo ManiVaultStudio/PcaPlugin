@@ -10,6 +10,9 @@
 
 #include "graphics/Vector2f.h"
 
+#include <QThread>
+#include <QPointer>
+
 /** All plugin related classes are in the HDPS plugin namespace */
 using namespace hdps::plugin;
 
@@ -87,8 +90,8 @@ private:
     SettingsAction              _settingsAction;            /** General PCA settings */
     DimensionSelectionAction    _dimensionSelectionAction;  /** Dimension selection */
 
-    PCAWorker                   _pcaWorker;                 /** Worker that computes PCA in another thread */
-    QThread*                    _workerThread;              /** Thread for PCA computation */
+    QPointer<PCAWorker>         _pcaWorker;                 /** Worker that computes PCA in another thread */
+    QThread                     _workerThread;              /** Thread for PCA computation */
 };
 
 /// ////////////// ///
