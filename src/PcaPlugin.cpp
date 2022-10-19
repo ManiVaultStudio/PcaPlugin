@@ -90,7 +90,6 @@ PCAPlugin::PCAPlugin(const PluginFactory* factory) :
     _pcaWorker(nullptr),
     _workerThread()
 {
-    qRegisterMetaType<std::vector<float>>();
 }
 
 void PCAPlugin::init()
