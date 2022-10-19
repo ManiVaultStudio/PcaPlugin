@@ -38,7 +38,7 @@ public:
     std::tuple<std::vector<float>&, size_t> getRestuls() { return { _pca_out, _num_comps }; }
 
 signals:
-    void resultReady();
+    void resultReady(int32_t pca_status);
 
 public slots:
     void compute();

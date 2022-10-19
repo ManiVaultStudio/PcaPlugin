@@ -87,13 +87,14 @@ void PCAWorker::setup(std::shared_ptr<std::vector<float>> data, size_t num_dims,
 }
 
 void PCAWorker::compute() {
+    int32_t pca_status = 0;
     utils::timer([&]() {
-        math::pca(*_data, /* number of dimension = */ _num_dims, /* transformed PCA data = */ _pca_out, /* number of pca components = */ _num_comps,
-            /* pca algorithm = */ _algorithm, /* data normalization = */ _norm, /* stdOrientation = */ _std_orient);
+        pca_status = math::pca(*_data, /* number of dimension = */ _num_dims, /* transformed PCA data = */ _pca_out, /* number of pca components = */ _num_comps,
+                                       /* pca algorithm = */ _algorithm, /* data normalization = */ _norm, /* stdOrientation = */ _std_orient);
         },
         "PCA computation time (ms)");
 
-    emit resultReady();
+    emit resultReady(pca_status);
 }
 
 
@@ -157,14 +158,20 @@ void PCAPlugin::init()
         computePCA();
     });
 
-    connect(&_pcaWorker, &PCAWorker::resultReady, this, [&]() {
+    connect(&_pcaWorker, &PCAWorker::resultReady, this, [&](int32_t pca_status) {
         auto [pca_out, num_comps] = _pcaWorker.getRestuls();
 
         // Publish pca to core
         setPCADataInCore(pca_out, num_comps);
 
         // Flag the analysis task as finished
-        setTaskFinished();
+        if(pca_status == EXIT_SUCCESS)
+            setTaskFinished();
+        else
+        {
+            setTaskAborted();
+            setTaskDescription("Computation failed");
+        }
 
         // Enabled action again
         _settingsAction.getStartAnalysisAction().setEnabled(true);
@@ -181,6 +188,8 @@ void PCAPlugin::init()
 
 void PCAPlugin::computePCA()
 {
+    std::cout << "PCA Plugin: Started." << std::endl;
+
     // Disable actions during analysis
     _settingsAction.getStartAnalysisAction().setEnabled(false);
 
@@ -189,9 +198,6 @@ void PCAPlugin::computePCA()
 
     // In order to report progress the task status has to be set to running
     setTaskRunning();
-
-    // Zero progress at the start
-    setTaskProgress(0.0f);
 
     // Get data 
     std::vector<float> data;

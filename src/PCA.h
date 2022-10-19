@@ -6,6 +6,9 @@
 #include <string>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
+#include <stdlib.h>
+	
 #include <assert.h>
 
 #include <omp.h>
@@ -117,7 +120,7 @@ namespace math {
         // then get the sign of the max abs value
         Eigen::VectorXf signs(mat.cols());
         Eigen::VectorXf::Index rowID;
-        for (unsigned int colID = 0; colID < mat.cols(); colID++)
+        for (uint32_t colID = 0; colID < mat.cols(); colID++)
         {
             mat.col(colID).cwiseAbs().maxCoeff(&rowID);
             signs[colID] = (mat(rowID, colID) >= 0) ? 1 : -1;
@@ -210,6 +213,9 @@ namespace math {
         // compute svd
         Eigen::BDCSVD<Eigen::MatrixXf> svd(data, Eigen::ComputeThinV);
 
+        if(svd.info() != Eigen::Success)
+            throw (std::runtime_error("pcaSVD failed. Eigen::ComputationInfo " + std::to_string(static_cast<int32_t>(svd.info()))));
+
         return svd.matrixV()(Eigen::all, Eigen::seq(0, num_comp - 1));
     }
 
@@ -223,6 +229,9 @@ namespace math {
         Eigen::SelfAdjointEigenSolver <Eigen::MatrixXf> es(covMat);
         Eigen::VectorXf eigenvalues = es.eigenvalues();
         Eigen::MatrixXf eigenvectors = es.eigenvectors();
+
+        if (es.info() != Eigen::Success)
+            throw (std::runtime_error("pcaCovMat failed. Eigen::ComputationInfo " + std::to_string(static_cast<int32_t>(es.info()))));
 
         // sort eigenvalues and save as Eigen::Vector
         auto eigenvalueOrder = argsort(eigenvalues, std::greater{});
@@ -253,7 +262,7 @@ namespace math {
         COV,    // Compute eigenvalues of covariance matrix of data, Eigen::SelfAdjointEigenSolver
     };
 
-    inline void pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, const PCA_ALG algorithm = PCA_ALG::SVD, const DATA_NORM norm = DATA_NORM::MINMAX, const bool stdOrientation = true)
+    inline int32_t pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, const PCA_ALG algorithm = PCA_ALG::SVD, const DATA_NORM norm = DATA_NORM::MINMAX, const bool stdOrientation = true)
     {
         // do not transform if data is 1d
         if (num_dims <= 1)
@@ -261,7 +270,7 @@ namespace math {
             num_comp = num_dims;
             pca_out = data_in;
             std::cout << "pca: num_dims == 1, no transformation is performed";
-            return;
+            return EXIT_FAILURE;
         }
 
         // convert std vector to Eigen MatrixXf
@@ -301,7 +310,15 @@ namespace math {
         data_normed = colwiseZeroMean(data_normed);
 
         // compute pcaSVD, get first num_comp components
-        Eigen::MatrixXf principal_components = pca_alg(data_normed);
+        Eigen::MatrixXf principal_components;
+        try {
+            principal_components = pca_alg(data_normed);
+        }
+        catch (const std::runtime_error& ex) {
+            std::cerr << "PCA could not be computed: " << ex.what() << std::endl;
+            pca_out = std::vector(data.rows() * num_comp, 0.0f);
+            return EXIT_FAILURE;
+        }
 
         // project data, compute pca components and
         Eigen::MatrixXf data_transformed = pcaTransform(data_normed, principal_components);
@@ -312,6 +329,8 @@ namespace math {
 
         // convert to std vector with [p0d0, p0d1, ..., p1d0, p1d1, ..., pNd0, pNd1, ..., pNdM]
         pca_out = convertEigenMatrixToStdVector(data_transformed);
+
+        return EXIT_SUCCESS;
 
     }
 
