@@ -57,16 +57,6 @@ math::DATA_NORM getDataNorm(size_t index) {
 /// ////////// ///
 /// PCA WORKER ///
 /// ////////// ///
-PCAWorker::PCAWorker() :
-    _data(nullptr),
-    _num_dims(0),
-    _num_comps(0),
-    _std_orient(true),
-    _algorithm(math::PCA_ALG::COV),
-    _norm(math::DATA_NORM::NONE)
-{
-}
-
 PCAWorker::PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm, bool std_orient) :
     _data(data), 
     _num_dims(num_dims),
@@ -75,15 +65,6 @@ PCAWorker::PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, 
     _algorithm(algorithm),
     _norm(norm)
 {
-}
-
-void PCAWorker::setup(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm, bool std_orient) {
-    _data = data;
-    _num_dims = num_dims;
-    _num_comps = num_comps;
-    _std_orient = std_orient;
-    _algorithm = algorithm;
-    _norm = norm;
 }
 
 void PCAWorker::compute() {
@@ -166,7 +147,7 @@ void PCAPlugin::init()
 
 void PCAPlugin::computePCA()
 {
-    std::cout << "PCA Plugin: Started." << std::endl;
+    std::cout << "PCA Plugin: Setting up..." << std::endl;
 
     if (_pcaWorker)
         _pcaWorker->deleteLater();
@@ -174,11 +155,10 @@ void PCAPlugin::computePCA()
     // Disable actions during analysis
     _settingsAction.getStartAnalysisAction().setEnabled(false);
 
-    // Set the task name as it will appear in the data hierarchy viewer
+    // Set the task name and description
     setTaskName("PCA");
-
-    // In order to report progress the task status has to be set to running
     setTaskRunning();
+    setTaskDescription("Computing...");
 
     // Get data 
     std::vector<float> data;
@@ -191,12 +171,8 @@ void PCAPlugin::computePCA()
     math::DATA_NORM norm = getDataNorm(_settingsAction.getDataNormAction().getCurrentIndex());
     bool stdOrientation = _settingsAction.getStdAxisOrientation().isChecked();
 
-    // Computat in different thread
-    setTaskDescription("Computing...");
-
-    _pcaWorker = new PCAWorker();
-    _pcaWorker->setup(std::make_shared<std::vector<float>>(data), dimensionIndices.size(), num_comps, alg, norm, stdOrientation);
-
+    // Compute in different thread
+    _pcaWorker = new PCAWorker(std::make_shared<std::vector<float>>(data), dimensionIndices.size(), num_comps, alg, norm, stdOrientation);
     _pcaWorker->moveToThread(&_workerThread);
 
     // setup pca computation 
@@ -224,10 +200,10 @@ void PCAPlugin::computePCA()
         std::cout << "PCA Plugin: Finished." << std::endl;
         });
 
-
     std::cout << "PCA Plugin: Starting computing PCA transformation with " << num_comps << " components (settings: alg " << static_cast<int>(alg) << ", norm " << static_cast<int>(norm) << ")" << std::endl;
+
+    // start thread and worker
     _workerThread.start();
-    // once finished _pcaWorker will call a lamda defined in this->init() that publishes the PCA
     emit startPCA();
 }
 
