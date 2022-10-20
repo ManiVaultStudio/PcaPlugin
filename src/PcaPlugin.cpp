@@ -23,10 +23,10 @@ math::PCA_ALG getPcaAlgorithm(size_t index) {
     switch (index)
     {
     case 0:
-        alg = math::PCA_ALG::SVD;
+        alg = math::PCA_ALG::COV;
         break;
     case 1:
-        alg = math::PCA_ALG::COV;
+        alg = math::PCA_ALG::SVD;
         break;
     }
 
