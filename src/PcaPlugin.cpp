@@ -193,6 +193,8 @@ void PCAPlugin::computePCA()
             setTaskDescription("Computation failed");
         }
 
+        _pcaWorker->deleteLater();
+
         // Enabled action again
         _settingsAction.getStartAnalysisAction().setEnabled(true);
 
