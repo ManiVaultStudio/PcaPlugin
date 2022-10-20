@@ -33,6 +33,17 @@ math::PCA_ALG getPcaAlgorithm(size_t index) {
     return alg;
 }
 
+std::ostream& operator<<(std::ostream& o, math::PCA_ALG alg)
+{
+
+    if(alg == math::PCA_ALG::COV)
+        return o << "COV";;
+    if (alg == math::PCA_ALG::SVD)
+        return o << "SVD";;
+
+    return o;
+}
+
 math::DATA_NORM getDataNorm(size_t index) {
     math::DATA_NORM norm = math::DATA_NORM::NONE;
 
@@ -51,6 +62,19 @@ math::DATA_NORM getDataNorm(size_t index) {
 
     return norm;
 
+}
+
+std::ostream& operator<<(std::ostream& o, math::DATA_NORM norm)
+{
+
+    if (norm == math::DATA_NORM::NONE)
+        return o << "NONE";;
+    if (norm == math::DATA_NORM::MEAN)
+        return o << "MEAN";;
+    if (norm == math::DATA_NORM::MINMAX)
+        return o << "MINMAX";;
+
+    return o;
 }
 
 
@@ -201,7 +225,7 @@ void PCAPlugin::computePCA()
         std::cout << "PCA Plugin: Finished." << std::endl;
         });
 
-    std::cout << "PCA Plugin: Starting computing PCA transformation with " << num_comps << " components (settings: alg " << static_cast<int>(alg) << ", norm " << static_cast<int>(norm) << ")" << std::endl;
+    std::cout << "PCA Plugin: Starting computing PCA transformation with " << num_comps << " components (settings: alg " << alg << ", norm " << norm << ")" << std::endl;
 
     // start thread and worker
     _workerThread.start();
