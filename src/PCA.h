@@ -211,12 +211,12 @@ namespace math {
     inline Eigen::MatrixXf pcaSVD(const Eigen::MatrixXf& data, const size_t num_comp)
     {
         // compute svd
-        Eigen::BDCSVD<Eigen::MatrixXf> svd(data, Eigen::ComputeThinV);
+        Eigen::BDCSVD<Eigen::MatrixXf, Eigen::ComputeThinV> svd(data);
 
         if(svd.info() != Eigen::Success)
             throw (std::runtime_error("pcaSVD failed. Eigen::ComputationInfo " + std::to_string(static_cast<int32_t>(svd.info()))));
 
-        return svd.matrixV()(Eigen::all, Eigen::seq(0, num_comp - 1));
+        return svd.matrixV()(Eigen::placeholders::all, Eigen::seq(0, num_comp - 1));
     }
 
     // data should be have column-wise zero empirical mean 
@@ -243,7 +243,7 @@ namespace math {
         eigenvectors = eigenvectors * perm;     // permute columns
         eigenvalues = perm * eigenvalues;
 
-        return eigenvectors(Eigen::all, Eigen::seq(0, num_comp - 1));
+        return eigenvectors(Eigen::placeholders::all, Eigen::seq(0, num_comp - 1));
     }
 
     inline Eigen::MatrixXf pcaTransform(const Eigen::MatrixXf& data, const Eigen::MatrixXf& principal_components)
