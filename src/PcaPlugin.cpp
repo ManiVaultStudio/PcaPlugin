@@ -149,7 +149,7 @@ void PCAPlugin::init()
     const auto numInitialDataDimensions = 2;
     initialData.resize(numPoints * numInitialDataDimensions);
     outputDataset->setData(initialData.data(), inputDataset->getNumPoints(), numInitialDataDimensions);
-    _core->notifyDatasetChanged(outputDataset);
+    events().notifyDatasetChanged(outputDataset);
 
     if (numPoints > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
     {
@@ -255,7 +255,7 @@ void PCAPlugin::setPCADataInCore(std::vector<float>& data, size_t num_components
 {
     auto outputDataset = getOutputDataset<Points>();
     outputDataset->setData(data.data(), getInputDataset<Points>()->getNumPoints(), num_components);
-    _core->notifyDatasetChanged(outputDataset);
+    events().notifyDatasetChanged(outputDataset);
 }
 
 QIcon PCAPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
@@ -274,14 +274,12 @@ PluginTriggerActions PCAPluginFactory::getPluginTriggerActions(const hdps::Datas
     PluginTriggerActions pluginTriggerActions;
 
     const auto getPluginInstance = [this](const Dataset<Points>& dataset) -> PCAPlugin* {
-        return dynamic_cast<PCAPlugin*>(Application::core()->requestPlugin(getKind(), { dataset }));
+        return dynamic_cast<PCAPlugin*>(plugins().requestPlugin(getKind(), { dataset }));
     };
 
     if (PluginFactory::areAllDatasetsOfTheSameType(datasets, PointType)) {
         if (datasets.count() >= 1) {
-            auto pluginTriggerAction = createPluginTriggerAction("PCA", "Perform a principle component analysis on the selected datasets", datasets);
-
-            connect(pluginTriggerAction, &QAction::triggered, [this, getPluginInstance, datasets]() -> void {
+            auto pluginTriggerAction = new PluginTriggerAction(const_cast<PCAPluginFactory*>(this), this, "PCA", "Perform a principle component analysis on the selected datasets", getIcon(), [this, getPluginInstance, datasets](PluginTriggerAction& pluginTriggerAction) -> void {
                 for (auto dataset : datasets)
                     getPluginInstance(dataset);
                 });
