@@ -99,7 +99,7 @@ class PCAPluginFactory : public AnalysisPluginFactory
     Q_INTERFACES(hdps::plugin::AnalysisPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "nl.BioVault.PCAPlugin"
-                      FILE  "PCAPlugin.json")
+                      FILE  "PcaPlugin.json")
 
 public:
 
