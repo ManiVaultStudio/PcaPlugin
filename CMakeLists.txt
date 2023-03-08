@@ -73,9 +73,9 @@ set(SOURCES
     src/SettingsAction.h
     src/SettingsAction.cpp
     src/PcaPlugin.json
-	src/PCA.h
-	src/DimensionSelectionAction.h
-	src/DimensionSelectionAction.cpp
+    src/PCA.h
+    src/DimensionSelectionAction.h
+    src/DimensionSelectionAction.cpp
 )
 
 source_group( Plugin FILES ${SOURCES})
@@ -165,11 +165,24 @@ endif()
 # -----------------------------------------------------------------------------
 # Target installation
 # -----------------------------------------------------------------------------
-add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-	"$<TARGET_FILE:${PCA_PLUGIN}>"
-	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PCA_PLUGIN}>"
+install(TARGETS ${PCA_PLUGIN}
+   RUNTIME DESTINATION Plugins COMPONENT SHAREDLIB   
+   LIBRARY DESTINATION Plugins COMPONENT LINKLIB
+   ARCHIVE DESTINATION lib COMPONENT SHAREDLIB
 )
+
+add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
+	COMMAND "${CMAKE_COMMAND}"
+	--install ${CMAKE_CURRENT_BINARY_DIR}
+	--config $<CONFIGURATION>
+	--prefix ${HDPS_INSTALL_DIR}/$<CONFIGURATION>
+)
+
+#add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
+#    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+#	"$<TARGET_FILE:${PCA_PLUGIN}>"
+#	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PCA_PLUGIN}>"
+#)
 
 # Automatically set the debug environment (command + working directory) for MSVC in debug mode
 set_property(TARGET ${PCA_PLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
