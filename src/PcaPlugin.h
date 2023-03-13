@@ -80,8 +80,9 @@ signals:
 
 private:
     void computePCA();
-    void getDataFromCore(std::vector<float>& data, std::vector<unsigned int>& indices);
-    void setPCADataInCore(std::vector<float>& data, size_t num_components);
+    void getDataFromCore(const hdps::Dataset<Points> coreDataset, std::vector<float>& data, std::vector<unsigned int>& indices);
+    void setPCADataInCore(hdps::Dataset<Points> coreDataset, const std::vector<float>& data, const size_t num_components);
+    void publishCopy();
 
 private:
     SettingsAction              _settingsAction;            /** General PCA settings */

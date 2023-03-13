@@ -158,9 +158,10 @@ void PCAPlugin::init()
     }
 
     // Start the analysis when the user clicks the start analysis push button
-    connect(&_settingsAction.getStartAnalysisAction(), &hdps::gui::TriggerAction::triggered, this, [&]() {
-        computePCA();
-    });
+    connect(&_settingsAction.getStartAnalysisAction(), &hdps::gui::TriggerAction::triggered, this, &PCAPlugin::computePCA);
+
+    // Publish a copy of the output data set
+    connect(&_settingsAction.getPublishNewDataAction(), &hdps::gui::TriggerAction::triggered, this, &PCAPlugin::publishCopy);
 
     // Update dimension selection with new data
     connect(&inputDataset, &Dataset<Points>::dataChanged, this, [this, inputDataset]() {
@@ -186,7 +187,7 @@ void PCAPlugin::computePCA()
     // Get data 
     std::vector<float> data;
     std::vector<unsigned int> dimensionIndices;
-    getDataFromCore(data, dimensionIndices);
+    getDataFromCore(getInputDataset<Points>(), data, dimensionIndices);
     size_t num_comps = _settingsAction.getNumberOfComponents().getValue();
 
     // Get settings
@@ -206,7 +207,7 @@ void PCAPlugin::computePCA()
         auto [pca_out, num_comps] = _pcaWorker->getRestuls();
 
         // Publish pca to core
-        setPCADataInCore(pca_out, num_comps);
+        setPCADataInCore(getOutputDataset<Points>(), pca_out, num_comps);
 
         // Flag the analysis task as finished
         if (pca_status == EXIT_SUCCESS)
@@ -222,6 +223,9 @@ void PCAPlugin::computePCA()
         // Enabled action again
         _settingsAction.getStartAnalysisAction().setEnabled(true);
 
+        // Enable users to copy the output to a new data set entry
+        _settingsAction.getPublishNewDataAction().setEnabled(true);
+
         std::cout << "PCA Plugin: Finished." << std::endl;
         });
 
@@ -232,31 +236,49 @@ void PCAPlugin::computePCA()
     emit startPCA();
 }
 
-void PCAPlugin::getDataFromCore(std::vector<float>& data, std::vector<unsigned int>& dimensionIndices)
+void PCAPlugin::getDataFromCore(const hdps::Dataset<Points> coreDataset, std::vector<float>& data, std::vector<unsigned int>& dimensionIndices)
 {
     // Extract the enabled dimensions from the data
     std::vector<bool> enabledDimensions = _dimensionSelectionAction.getPickerAction().getEnabledDimensions();
     const auto numEnabledDimensions = count_if(enabledDimensions.begin(), enabledDimensions.end(), [](bool b) { return b; });
 
-    // Get input data set
-    auto inputPoints = getInputDataset<Points>();
-    data.resize((inputPoints->isFull() ? inputPoints->getNumPoints() : inputPoints->indices.size()) * numEnabledDimensions);
+    // resize outout data
+    data.resize((coreDataset->isFull() ? coreDataset->getNumPoints() : coreDataset->indices.size()) * numEnabledDimensions);
 
     // populate dimensionIndices
-    for (uint32_t i = 0; i < inputPoints->getNumDimensions(); i++)
+    for (uint32_t i = 0; i < coreDataset->getNumDimensions(); i++)
         if (enabledDimensions[i])
             dimensionIndices.push_back(i);
 
     // populate data
-    inputPoints->populateDataForDimensions<std::vector<float>, std::vector<unsigned int>>(data, dimensionIndices);
+    coreDataset->populateDataForDimensions<std::vector<float>, std::vector<unsigned int>>(data, dimensionIndices);
 }
 
-void PCAPlugin::setPCADataInCore(std::vector<float>& data, size_t num_components)
+void PCAPlugin::setPCADataInCore(hdps::Dataset<Points> coreDataset, const std::vector<float>& data, size_t num_components)
 {
-    auto outputDataset = getOutputDataset<Points>();
-    outputDataset->setData(data.data(), getInputDataset<Points>()->getNumPoints(), num_components);
-    events().notifyDatasetChanged(outputDataset);
+    coreDataset->setData(data.data(), getInputDataset<Points>()->getNumPoints(), num_components);
+    events().notifyDatasetChanged(coreDataset);
 }
+
+void PCAPlugin::publishCopy()
+{
+    std::cout << "PCA Plugin: Publish a copy of the output dataset." << std::endl;
+
+    // Create new data set
+    auto copyDataset = _core->addDataset("Points", "PCA (copy)", getInputDataset());
+
+    // Get data 
+    std::vector<float> data;
+    std::vector<unsigned int> dimensionIndices;
+    getDataFromCore(getOutputDataset<Points>(), data, dimensionIndices);
+
+    // Set data
+    setPCADataInCore(copyDataset, data, dimensionIndices.size());
+}
+
+/// ////////////// ///
+/// PLUGIN FACTORY ///
+/// ////////////// ///
 
 QIcon PCAPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {

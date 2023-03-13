@@ -6,7 +6,8 @@ SettingsAction::SettingsAction(QObject* parent) :
     _dataNormAction(this, "Data norm"),
     _numberOfComponents(this, "Number of PCA components"),
     _stdAxisOrientation(this, "Std. axis orientation"),
-    _startAnalysisAction(this, "Start analysis")
+    _startAnalysisAction(this, "Start analysis"),
+    _publishNewDataAction(this, "Copy to new data set")
 {
     setText("PCA");
 
@@ -15,6 +16,9 @@ SettingsAction::SettingsAction(QObject* parent) :
     _numberOfComponents.setToolTip("Number of PCA components to be used");
     _stdAxisOrientation.setToolTip("Enforce standardized axis orientation");
     _startAnalysisAction.setToolTip("Start the analysis");
+    _publishNewDataAction.setToolTip("Published a copy of the output");
+
+    _publishNewDataAction.setEnabled(false); // only enable once an analysis is done
 
     _pcaAlgorithmAction.initialize(QStringList({ "COV", "SVD" }), "COV", "COV");
     _dataNormAction.initialize(QStringList({ "None", "Mean Norm", "Min-Max Norm"}), "None", "None");

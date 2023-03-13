@@ -26,6 +26,7 @@ public: // Action getters
     IntegralAction& getNumberOfComponents() { return _numberOfComponents; }
     ToggleAction& getStdAxisOrientation() { return _stdAxisOrientation; }
     TriggerAction& getStartAnalysisAction() { return _startAnalysisAction; }
+    TriggerAction& getPublishNewDataAction() { return _publishNewDataAction; }
 
 public:
     OptionAction    _pcaAlgorithmAction;            /** PCA algorithm action */
@@ -33,4 +34,5 @@ public:
     IntegralAction  _numberOfComponents;            /** Number of components action */
     ToggleAction    _stdAxisOrientation;            /** Enforce standardized axis orientation */
     TriggerAction   _startAnalysisAction;           /** Start computation */
+    TriggerAction   _publishNewDataAction;          /** Publish new data set, one that is not derived */
 };
