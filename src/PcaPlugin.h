@@ -2,13 +2,10 @@
 
 #include <AnalysisPlugin.h>
 
-#include <memory>
-#include <tuple>
-
 #include "SettingsAction.h"
 #include "DimensionSelectionAction.h"
 
-#include "graphics/Vector2f.h"
+#include <tuple>
 
 #include <QThread>
 #include <QPointer>

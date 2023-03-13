@@ -6,7 +6,6 @@
 #include <actions/PluginTriggerAction.h>
 
 #include <QtCore>
-#include <QDebug>
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
 
