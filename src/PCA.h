@@ -13,7 +13,9 @@
 
 #include <omp.h>
 
+#pragma warning(disable: 4068)
 #include "Eigen/Dense"
+#pragma warning(default: 4068)
 
 namespace utils {
 
