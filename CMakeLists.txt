@@ -96,6 +96,11 @@ target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_SUFFIX}")
 target_link_libraries(${PCA_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_SUFFIX}")
 
+if(APPLE)
+    target_link_libraries("${PROJECT}" PUBLIC debug "/usr/local/lib/libomp.dylib")
+    target_link_libraries("${PROJECT}" PUBLIC optimized "/usr/local/lib/libomp.dylib")       
+endif()
+
 if(OpenMP_CXX_FOUND)
 	message(STATUS "Link to OpenMP")
 	target_link_libraries(${PCA_PLUGIN} PRIVATE OpenMP::OpenMP_CXX)
