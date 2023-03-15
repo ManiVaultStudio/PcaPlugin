@@ -40,7 +40,7 @@ message(STATUS "Install plugin to ${INSTALL_DIR}")
 # Dependencies
 # -----------------------------------------------------------------------------
 
-find_package(Qt6 6.3 COMPONENTS Widgets WebEngineWidgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 find_package(OpenMP)
 
 set(Eigen3_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/eigen")
