@@ -15,7 +15,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN32 /EHsc /MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
@@ -90,7 +90,6 @@ target_include_directories(${PCA_TESTS} PRIVATE ${Eigen3_DIR})
 # -----------------------------------------------------------------------------
 # linking against catch will add the proper include path
 target_link_libraries(${PCA_TESTS} PRIVATE Catch2::Catch2WithMain)
-
 target_link_libraries(${PCA_TESTS} PRIVATE nlohmann_json::nlohmann_json)
 
 # -----------------------------------------------------------------------------
@@ -98,8 +97,9 @@ target_link_libraries(${PCA_TESTS} PRIVATE nlohmann_json::nlohmann_json)
 # -----------------------------------------------------------------------------
 
 # Request C++17
-target_compile_features(${PCA_TESTS} PRIVATE cxx_std_20)
+target_compile_features(${PCA_TESTS} PRIVATE cxx_std_17)
+target_compile_features(${PCA_TESTS} PRIVATE c_std_17)
+
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")	# strict standard conformance
     target_compile_options(${PCA_TESTS} PRIVATE /bigobj)	# for Eigen
 endif(MSVC)
