@@ -10,7 +10,7 @@ PROJECT(${PCA_PLUGIN} C CXX)
 # Set cmake flags
 # -----------------------------------------------------------------------------
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+# set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
