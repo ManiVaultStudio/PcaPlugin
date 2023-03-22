@@ -104,6 +104,7 @@ endif()
 if(OpenMP_CXX_FOUND)
 	message(STATUS "Link to OpenMP")
 	target_link_libraries(${PCA_PLUGIN} PRIVATE OpenMP::OpenMP_CXX)
+	target_compile_options(${PCA_PLUGIN} PRIVATE ${OpenMP_CXX_FLAGS})
 endif()
 
 # -----------------------------------------------------------------------------
