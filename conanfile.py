@@ -105,7 +105,7 @@ class PcaPluginConan(ConanFile):
                 "brew --prefix libomp", shell=True, capture_output=True
             )
             prefix_path = f"{proc.stdout.decode('UTF-8').strip()}"
-            tc.variables["CMAKE_PREFIX_PATH"] = prefix_path
+            tc.variables["OpenMP_ROOT"] = prefix_path
         tc.generate()
 
     def _configure_cmake(self):
