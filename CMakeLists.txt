@@ -97,8 +97,8 @@ target_link_libraries(${PCA_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/lib
 target_link_libraries(${PCA_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_SUFFIX}")
 
 if(APPLE)
-    target_link_libraries("${PCA_PLUGIN} " PUBLIC debug "/usr/local/lib/libomp.dylib")
-    target_link_libraries("${PCA_PLUGIN} " PUBLIC optimized "/usr/local/lib/libomp.dylib")       
+    target_link_libraries(${PCA_PLUGIN} PRIVATE debug "/usr/local/lib/libomp.dylib")
+    target_link_libraries(${PCA_PLUGIN} PRIVATE optimized "/usr/local/lib/libomp.dylib")       
 endif()
 
 if(OpenMP_CXX_FOUND)
