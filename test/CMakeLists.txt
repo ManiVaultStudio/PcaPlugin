@@ -115,39 +115,22 @@ if(MSVC)
 endif(MSVC)
 
 # Instruction sets
-if(MSVC)
-	target_compile_definitions(${PCA_TESTS} PRIVATE /arch:SSE2)
+set(AXV_CompileOption $<IF:$<CXX_COMPILER_ID:MSVC>,/arch:AVX,-DUSE_AVX>)
+set(AXV2_CompileOption $<IF:$<CXX_COMPILER_ID:MSVC>,/arch:AVX2,-DUSE_AVX2>)
+set(SSE2_CompileOption $<IF:$<CXX_COMPILER_ID:MSVC>,/arch:SSE2,-DUSE_SSE2>)
 
-	check_cxx_compiler_flag("/arch:AVX" COMPILER_OPT_AVX_SUPPORTED)
-	if(${COMPILER_OPT_AVX_SUPPORTED})
-		target_compile_definitions(${PCA_TESTS} PRIVATE /arch:AVX)
-	endif()
-	
-	check_cxx_compiler_flag("/arch:AVX2" COMPILER_OPT_AVX2_SUPPORTED)
-	if(${COMPILER_OPT_AVX2_SUPPORTED})
-		target_compile_definitions(${PCA_TESTS} PRIVATE /arch:AVX2)
-	endif()
+check_cxx_compiler_flag(${AXV_CompileOption} COMPILER_OPT_AVX_SUPPORTED)
+check_cxx_compiler_flag(${AXV2_CompileOption} COMPILER_OPT_AVX2_SUPPORTED)
 
-else()
-	target_compile_definitions(${PCA_TESTS} PRIVATE -DUSE_SSE2)
-
-	check_cxx_compiler_flag("-DUSE_AVX" COMPILER_OPT_AVX_SUPPORTED)
-	if(${COMPILER_OPT_AVX_SUPPORTED})
-		target_compile_definitions(${PCA_TESTS} PRIVATE -DUSE_AVX)
-	endif()
-	
-	check_cxx_compiler_flag("-DUSE_AVX2" COMPILER_OPT_AVX2_SUPPORTED)
-	if(${COMPILER_OPT_AVX2_SUPPORTED})
-		target_compile_definitions(${PCA_TESTS} PRIVATE -DUSE_AVX2)
-	endif()
-
-endif()
-
-if(${COMPILER_OPT_AVX_SUPPORTED})
-	MESSAGE( STATUS "Use AXV")
-endif()
 if(${COMPILER_OPT_AVX2_SUPPORTED})
 	MESSAGE( STATUS "Use AXV2")
+	target_compile_options(${PCA_PLUGIN} PRIVATE ${AXV2_CompileOption})
+elseif(${COMPILER_OPT_AVX_SUPPORTED})
+	MESSAGE( STATUS "Use AXV")
+	target_compile_options(${PCA_PLUGIN} PRIVATE ${AXV_CompileOption})
+else()
+	MESSAGE( STATUS "Use SSE2")
+	target_compile_options(${PCA_PLUGIN} PRIVATE ${SSE2_CompileOption})
 endif()
 
 # Warning levels
