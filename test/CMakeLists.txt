@@ -100,7 +100,6 @@ target_link_libraries(${PCA_TESTS} PRIVATE nlohmann_json::nlohmann_json)
 if(USE_OPENMP AND OpenMP_CXX_FOUND)
 	message(STATUS "Link to OpenMP")
 	target_link_libraries(${PCA_TESTS} PRIVATE OpenMP::OpenMP_CXX)
-	target_compile_options(${PCA_TESTS} PRIVATE ${OpenMP_CXX_FLAGS})
 endif()
 
 # -----------------------------------------------------------------------------
