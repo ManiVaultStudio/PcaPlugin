@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.21)
+
+option(USE_OPENMP "Use OpenMP - by default ON" ON)
+
 # -----------------------------------------------------------------------------
 # Project: PCA plugin testing
 # -----------------------------------------------------------------------------
@@ -24,6 +27,8 @@ endif(MSVC)
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
+
+find_package(OpenMP)
 
 set(PCA_PLUGIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
@@ -92,12 +97,18 @@ target_include_directories(${PCA_TESTS} PRIVATE ${Eigen3_DIR})
 target_link_libraries(${PCA_TESTS} PRIVATE Catch2::Catch2WithMain)
 target_link_libraries(${PCA_TESTS} PRIVATE nlohmann_json::nlohmann_json)
 
+if(USE_OPENMP AND OpenMP_CXX_FOUND)
+	message(STATUS "Link to OpenMP")
+	target_link_libraries(${PCA_TESTS} PRIVATE OpenMP::OpenMP_CXX)
+	target_compile_options(${PCA_TESTS} PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
+
 # -----------------------------------------------------------------------------
 # Target properties
 # -----------------------------------------------------------------------------
 
 # Request C++17
-target_compile_features(${PCA_TESTS} PRIVATE cxx_std_17)
+target_compile_features(${PCA_TESTS} PRIVATE cxx_std_20)
 target_compile_features(${PCA_TESTS} PRIVATE c_std_17)
 
 if(MSVC)
