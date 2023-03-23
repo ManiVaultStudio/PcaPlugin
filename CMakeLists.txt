@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
+
+option(USE_OPENMP "Use OpenMP - by default ON" ON)
+
 # -----------------------------------------------------------------------------
 # Project: PCA plugin
 # -----------------------------------------------------------------------------
@@ -96,12 +99,7 @@ target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_SUFFIX}")
 target_link_libraries(${PCA_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_SUFFIX}")
 
-if(APPLE)
-    target_link_libraries(${PCA_PLUGIN} PUBLIC debug "/usr/local/lib/libomp.dylib")
-    target_link_libraries(${PCA_PLUGIN} PUBLIC optimized "/usr/local/lib/libomp.dylib")       
-endif()
-
-if(OpenMP_CXX_FOUND)
+if(USE_OPENMP AND OpenMP_CXX_FOUND)
 	message(STATUS "Link to OpenMP")
 	target_link_libraries(${PCA_PLUGIN} PRIVATE OpenMP::OpenMP_CXX)
 	target_compile_options(${PCA_PLUGIN} PRIVATE ${OpenMP_CXX_FLAGS})
