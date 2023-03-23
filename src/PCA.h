@@ -7,9 +7,9 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
-#include <stdlib.h>
+#include <cstdlib>
 	
-#include <assert.h>
+#include <cassert>
 
 #ifdef _OPENMP 
 #include <omp.h>
