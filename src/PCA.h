@@ -127,7 +127,7 @@ namespace math {
         for (uint32_t colID = 0; colID < mat.cols(); colID++)
         {
             mat.col(colID).cwiseAbs().maxCoeff(&rowID);
-            signs[colID] = (mat(rowID, colID) >= 0) ? 1 : -1;
+            signs[colID] = (mat(rowID, colID) >= 0) ? 1.0f : -1.0f;
         }
 
         // flip columns

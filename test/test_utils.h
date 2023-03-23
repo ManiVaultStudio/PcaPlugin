@@ -12,15 +12,15 @@ namespace testing {
 	/// /////// ///
 
 	template<class T>
-	void printVector(std::vector<T>& vec)
+	void printVector(const std::vector<T>& vec)
 	{
-		for (auto& val : vec)
+		for (const auto& val : vec)
 			std::cout << val << " ";
 		std::cout << std::endl;
 	}
 
 	template<class T>
-	void printVector(std::vector<T>& vec, size_t until)
+	void printVector(const std::vector<T>& vec, size_t until)
 	{
 		if (until >= vec.size()) until = vec.size();
 
@@ -29,7 +29,7 @@ namespace testing {
 		std::cout << std::endl;
 	}
 
-	void printLine(std::string line)
+	void printLine(const std::string& line)
 	{
 		std::cout << line << std::endl;
 	}
@@ -90,7 +90,7 @@ namespace testing {
 	/// FILE IO ///
 	/// /////// ///
 
-	bool readBinaryToStdVector(const std::string fileName, std::vector<float>& data)
+	[[nodiscard]] int readBinaryToStdVector(const std::string& fileName, std::vector<float>& data)
 	{
 		std::ifstream fin(fileName, std::ios::in | std::ios::binary);
 	

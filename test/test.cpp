@@ -56,13 +56,15 @@ TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]
 		// Priciple components
 		Eigen::MatrixXf matrixV = math::pcaCovMat(data, num_comp);
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "sklearn_pca.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "sklearn_pca.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 		REQUIRE(compEigAndStdMatrixAppr(matrixV, principal_components_reference));
 
 		// Transformation
 		Eigen::MatrixXf trans = math::pcaTransform(data, matrixV);
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "sklearn_trans.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "sklearn_trans.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 		REQUIRE(compEigAndStdMatrixAppr(trans, data_transformed_reference));
 
 		// Single step
@@ -85,9 +87,12 @@ TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]
 		//std::vector<float> sklearn_pca_norm_minmax;
 		//readBinaryToStdVector(dataDir.string() + "sklearn_pca_norm_minmax.bin", sklearn_pca_norm_minmax);
 		std::vector<float> sklearn_data_norm_minmax;
-		readBinaryToStdVector(dataDir.string() + "sklearn_data_norm_minmax.bin", sklearn_data_norm_minmax);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "sklearn_data_norm_minmax.bin", sklearn_data_norm_minmax);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> sklearn_trans_norm_minmax;
-		readBinaryToStdVector(dataDir.string() + "sklearn_trans_norm_minmax.bin", sklearn_trans_norm_minmax);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "sklearn_trans_norm_minmax.bin", sklearn_trans_norm_minmax);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		//REQUIRE(sklearn_pca_norm_minmax.size() == num_comp * num_dims);
 		REQUIRE(sklearn_data_norm_minmax.size() == num_points * num_dims);
@@ -118,9 +123,12 @@ TEST_CASE("Sklearn example data", "[PCA][COV][SVD][NONORM][MinMaxNorm][MeanNorm]
 		//std::vector<float> sklearn_pca_norm_mean;
 		//readBinaryToStdVector(dataDir.string() + "sklearn_pca_norm_mean.bin", sklearn_pca_norm_minmax);
 		std::vector<float> sklearn_data_norm_mean;
-		readBinaryToStdVector(dataDir.string() + "sklearn_data_norm_mean.bin", sklearn_data_norm_mean);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "sklearn_data_norm_mean.bin", sklearn_data_norm_mean);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> sklearn_trans_norm_mean;
-		readBinaryToStdVector(dataDir.string() + "sklearn_trans_norm_mean.bin", sklearn_trans_norm_mean);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "sklearn_trans_norm_mean.bin", sklearn_trans_norm_mean);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		// check if data set was loaded correctly
 		//REQUIRE(sklearn_pca_norm_mean.size() == num_comp * num_dims);
@@ -158,11 +166,11 @@ TEST_CASE("Toy data", "[PCA][SVD][COV]") {
 
 		// define data
 		Eigen::MatrixXf eigen_data(num_pts, num_dim);
-		eigen_data << 1, 1, 3, 2, 1, 4, -3, 2, 0, 0.1, 0.5, 0.8, 2, 1, 1, 4, 2, 3;
+		eigen_data << 1.0f, 1.0f, 3.0f, 2.0f, 1.0f, 4.0f, -3.0f, 2.0f, 0.0f, 0.1f, 0.5f, 0.8f, 2.0f, 1.0f, 1.0f, 4.0f, 2.0f, 3.0f;
 		
-		const std::vector<float> reference_components{ 0.86774688, -0.49679373,  0.01453782, -0.02012211, -0.00589032,  0.99978018,  0.49659889,  0.86784866, 0.01510785 };
-		const std::vector<float> reference_transform{  0.50372027,  0.90652942, -0.2345759,   1.86806603,  1.27758436, -0.20493023, -4.47718603,  0.28426804, 0.66172945,
-													  -1.35970842, -0.55267811, -0.78078729,  0.37826936, -1.32596162, -0.25025377,  3.08683879, -0.58974208, 0.80881774 };
+		const std::vector<float> reference_components{ 0.86774688f, -0.49679373f,  0.01453782f, -0.02012211f, -0.00589032f,  0.99978018f,  0.49659889f,  0.86784866f, 0.01510785f };
+		const std::vector<float> reference_transform{  0.50372027f,  0.90652942f, -0.2345759f,   1.86806603f,  1.27758436f, -0.20493023f, -4.47718603f,  0.28426804f, 0.66172945f,
+													  -1.35970842f, -0.55267811f, -0.78078729f,  0.37826936f, -1.32596162f, -0.25025377f,  3.08683879f, -0.58974208f, 0.80881774f };
 
 		// center the data
 		eigen_data = eigen_data.rowwise() - eigen_data.colwise().mean();
@@ -243,9 +251,12 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 		// Load the reference values
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_pca_norm_minmax_2.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_pca_norm_minmax_2.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_trans_norm_minmax_2.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_trans_norm_minmax_2.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		individualSteps(principal_components_std, data_transformed_std, num_comp);
 
@@ -260,9 +271,12 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 		// Load the reference values
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_pca_norm_minmax_4.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_pca_norm_minmax_4.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_trans_norm_minmax_4.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_trans_norm_minmax_4.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		individualSteps(principal_components_std, data_transformed_std, num_comp);
 
@@ -277,9 +291,12 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 		// Load the reference values
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_pca_norm_minmax_2.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_pca_norm_minmax_2.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_trans_norm_minmax_2.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_trans_norm_minmax_2.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		std::vector<float> transSVD;
 		math::pca(data_in, num_dims, transSVD, num_comp, math::PCA_ALG::SVD, math::DATA_NORM::MINMAX);
@@ -293,9 +310,12 @@ TEST_CASE("Iris SVD MinMaxNorm data", "[PCA][SVD][MinMaxNorm]") {
 
 		// Load the reference values
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_pca_norm_minmax_4.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_pca_norm_minmax_4.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_trans_norm_minmax_4.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_trans_norm_minmax_4.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		std::vector<float> transSVD;
 		math::pca(data_in, num_dims, transSVD, num_comp, math::PCA_ALG::SVD, math::DATA_NORM::MINMAX);
@@ -359,9 +379,12 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MeanNorm]") {
 
 		// Load the reference values
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_pca_norm_mean_2.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_pca_norm_mean_2.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_trans_norm_mean_2.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_trans_norm_mean_2.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		individualSteps(principal_components_std, data_transformed_std, num_comp);
 
@@ -376,9 +399,12 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MeanNorm]") {
 
 		// Load the reference values
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_pca_norm_mean_4.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_pca_norm_mean_4.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_trans_norm_mean_4.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_trans_norm_mean_4.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		individualSteps(principal_components_std, data_transformed_std, num_comp);
 
@@ -393,9 +419,12 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MeanNorm]") {
 
 		// Load the reference values
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_pca_norm_mean_2.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_pca_norm_mean_2.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_trans_norm_mean_2.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_trans_norm_mean_2.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		std::vector<float> transSVD;
 		math::pca(data_in, num_dims, transSVD, num_comp, math::PCA_ALG::COV, math::DATA_NORM::MEAN);
@@ -409,9 +438,12 @@ TEST_CASE("Iris COV MeanNorm data", "[PCA][COV][MeanNorm]") {
 
 		// Load the reference values
 		std::vector<float> principal_components_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_pca_norm_mean_4.bin", principal_components_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_pca_norm_mean_4.bin", principal_components_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
+
 		std::vector<float> data_transformed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_trans_norm_mean_4.bin", data_transformed_reference);
+		readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_trans_norm_mean_4.bin", data_transformed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		std::vector<float> transSVD;
 		math::pca(data_in, num_dims, transSVD, num_comp, math::PCA_ALG::COV, math::DATA_NORM::MEAN);
@@ -429,6 +461,7 @@ TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
 	const std::string fileName = dataDir.string() + "iris_data.bin";
 	std::vector<float> data_in;
 	int readFileSucess = readBinaryToStdVector(fileName, data_in);
+	REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 	// check if file exists
 	REQUIRE(readFileSucess == EXIT_SUCCESS);
@@ -455,7 +488,8 @@ TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
 		printLine("Iris data: Mean Norm");
 
 		std::vector<float> data_normed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_data_norm_mean.bin", data_normed_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_data_norm_mean.bin", data_normed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		// mean norm
 		Eigen::MatrixXf data_normed = math::meanNormalization(data);
@@ -468,7 +502,8 @@ TEST_CASE("Iris data normalization", "[MeanNorm][MinMaxNorm]") {
 		printLine("Iris data: MinMax Norm");
 
 		std::vector<float> data_normed_reference;
-		readBinaryToStdVector(dataDir.string() + "iris_data_norm_minmax.bin", data_normed_reference);
+		int readFileSucess = readBinaryToStdVector(dataDir.string() + "iris_data_norm_minmax.bin", data_normed_reference);
+		REQUIRE(readFileSucess == EXIT_SUCCESS);
 
 		// mean norm
 		Eigen::MatrixXf data_normed = math::minMaxNormalization(data);
