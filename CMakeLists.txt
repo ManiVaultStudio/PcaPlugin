@@ -117,28 +117,30 @@ if(MSVC)
 endif(MSVC)
 
 # Instruction sets
-add_definitions(-DUSE_SSE)
-
 if(MSVC)
+	target_compile_definitions(${PCA_PLUGIN} PRIVATE /arch:SSE2)
+
 	check_cxx_compiler_flag("/arch:AVX" COMPILER_OPT_AVX_SUPPORTED)
 	if(${COMPILER_OPT_AVX_SUPPORTED})
-		add_definitions(/arch:AVX)
+		target_compile_definitions(${PCA_PLUGIN} PRIVATE /arch:AVX)
 	endif()
 	
 	check_cxx_compiler_flag("/arch:AVX2" COMPILER_OPT_AVX2_SUPPORTED)
 	if(${COMPILER_OPT_AVX2_SUPPORTED})
-		add_definitions(/arch:AVX2)
+		target_compile_definitions(${PCA_PLUGIN} PRIVATE /arch:AVX2)
 	endif()
 
 else()
+	target_compile_definitions(${PCA_PLUGIN} PRIVATE -DUSE_SSE2)
+
 	check_cxx_compiler_flag("-DUSE_AVX" COMPILER_OPT_AVX_SUPPORTED)
 	if(${COMPILER_OPT_AVX_SUPPORTED})
-		add_definitions(-DUSE_AVX)
+		target_compile_definitions(${PCA_PLUGIN} PRIVATE -DUSE_AVX)
 	endif()
 	
 	check_cxx_compiler_flag("-DUSE_AVX2" COMPILER_OPT_AVX2_SUPPORTED)
 	if(${COMPILER_OPT_AVX2_SUPPORTED})
-		add_definitions(-DUSE_AVX2)
+		target_compile_definitions(${PCA_PLUGIN} PRIVATE -DUSE_AVX2)
 	endif()
 
 endif()
