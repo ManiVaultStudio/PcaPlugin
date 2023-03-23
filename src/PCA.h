@@ -11,7 +11,9 @@
 	
 #include <assert.h>
 
+#ifdef _OPENMP 
 #include <omp.h>
+#endif
 
 #pragma warning(disable: 4068)
 #include "Eigen/Dense"
