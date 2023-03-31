@@ -5,4 +5,5 @@ DimensionSelectionAction::DimensionSelectionAction(QObject* parent) :
     _pickerAction(this)
 {
     setText("Dimensions");
+        setPopupSizeHint(QSize(400, 0));
 }
