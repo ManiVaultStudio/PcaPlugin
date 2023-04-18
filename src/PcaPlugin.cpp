@@ -1,6 +1,6 @@
 #include "PcaPlugin.h"
 
-#include "PointData.h"
+#include "PointData/PointData.h"
 #include "PCA.h"
 
 #include <actions/PluginTriggerAction.h>

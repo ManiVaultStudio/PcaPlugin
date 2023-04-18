@@ -88,16 +88,20 @@ target_include_directories(${PCA_PLUGIN} PRIVATE ${Eigen3_DIR})
 # -----------------------------------------------------------------------------
 # Target library linking
 # -----------------------------------------------------------------------------
-if(MSVC)
-    set(LIB_SUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
-else()
-    set(LIB_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
-endif()
-
+# link Qt
 target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
-target_link_libraries(${PCA_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_SUFFIX}")
-target_link_libraries(${PCA_PLUGIN} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_SUFFIX}")
+
+# link ManiVault core and data plugins
+set(HDPS_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/lib")
+set(PLUGIN_LINK_PATH "${INSTALL_DIR}/$<CONFIGURATION>/$<IF:$<CXX_COMPILER_ID:MSVC>,lib,Plugins>")
+set(HDPS_LINK_SUFFIX $<IF:$<CXX_COMPILER_ID:MSVC>,${CMAKE_LINK_LIBRARY_SUFFIX},${CMAKE_SHARED_LIBRARY_SUFFIX}>)
+
+set(HDPS_LINK_LIBRARY "${HDPS_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${HDPS_LINK_SUFFIX}")
+set(POINTDATA_LINK_LIBRARY "${PLUGIN_LINK_PATH}/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${HDPS_LINK_SUFFIX}") 
+
+target_link_libraries(${PCA_PLUGIN} PRIVATE "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${PCA_PLUGIN} PRIVATE "${POINTDATA_LINK_LIBRARY}")
 
 if(USE_OPENMP AND OpenMP_CXX_FOUND)
 	message(STATUS "Link to OpenMP")
@@ -146,9 +150,8 @@ endif()
 # Target installation
 # -----------------------------------------------------------------------------
 install(TARGETS ${PCA_PLUGIN}
-   RUNTIME DESTINATION Plugins COMPONENT SHAREDLIB   
-   LIBRARY DESTINATION Plugins COMPONENT LINKLIB
-   ARCHIVE DESTINATION lib COMPONENT SHAREDLIB
+    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
+    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
 )
 
 add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
