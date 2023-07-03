@@ -1,7 +1,7 @@
 #include "SettingsAction.h"
 
 SettingsAction::SettingsAction(QObject* parent) :
-    GroupAction(parent, true),
+    GroupAction(parent, "SettingsAction", true),
     _pcaAlgorithmAction(this, "PCA alg"),
     _dataNormAction(this, "Data norm"),
     _numberOfComponents(this, "Number of PCA components"),
@@ -20,9 +20,9 @@ SettingsAction::SettingsAction(QObject* parent) :
 
     _publishNewDataAction.setEnabled(false); // only enable once an analysis is done
 
-    _pcaAlgorithmAction.initialize(QStringList({ "COV", "SVD" }), "COV", "COV");
-    _dataNormAction.initialize(QStringList({ "None", "Mean Norm", "Min-Max Norm"}), "None", "None");
-    _stdAxisOrientation.initialize(true, true);
-    _numberOfComponents.initialize(1, 2, 2, 2);    // default: use 2 PCA components, max is set data-dependent in PcaPlugin.cpp 
+    _pcaAlgorithmAction.initialize(QStringList({ "COV", "SVD" }), "COV");
+    _dataNormAction.initialize(QStringList({ "None", "Mean Norm", "Min-Max Norm"}), "None");
+    _stdAxisOrientation.setChecked(true);
+    _numberOfComponents.initialize(1, 2, 2);    // default: use 2 PCA components, max is set data-dependent in PcaPlugin.cpp 
 }
 
