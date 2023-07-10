@@ -30,14 +30,29 @@ include(CMakeCheckSetAVX)
 # -----------------------------------------------------------------------------
 # Set install directory
 # -----------------------------------------------------------------------------
-if (NOT DEFINED ENV{HDPS_INSTALL_DIR})
-	message(FATAL_ERROR "Environment variable HDPS_INSTALL_DIR not set.")
+if(DEFINED ENV{HDPS_INSTALL_DIR})
+    set(INSTALL_DIR "$ENV{HDPS_INSTALL_DIR}")
+    file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
+
+    set(messageText 
+    "***************************************************
+    Using environment variable HDPS_INSTALL_DIR 
+    $ENV{HDPS_INSTALL_DIR}
+    to indicate where the ManiVault plugin output will 
+    be installed. Make sure the directory exists.
+    ***************************************************")
+    string(REPLACE "\n    " "\n" messageText "${messageText}")
+    message(STATUS "${messageText}")
+else()
+    # Normalize the incoming install path
+    file(TO_CMAKE_PATH ${INSTALL_DIR} INSTALL_DIR)
 endif()
 
-file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
-set(CMAKE_INSTALL_PREFIX ${INSTALL_DIR} CACHE PATH "..." FORCE)
-
-message(STATUS "Install plugin to ${INSTALL_DIR}")
+if(NOT DEFINED INSTALL_DIR OR INSTALL_DIR STREQUAL "")
+    message(FATAL_ERROR "No install path provided! Set the cmake variable INSTALL_DIR or environment variable HDPS_INSTALL_DIR")
+else()
+    message(STATUS "Install plugin to ${INSTALL_DIR}")
+endif()
 
 # -----------------------------------------------------------------------------
 # Dependencies
@@ -58,7 +73,7 @@ ENDIF()
 # Source files
 # -----------------------------------------------------------------------------
 
-set(PCA_PLUGIN_SOURCES
+set(PLUGIN_SOURCES
     src/PcaPlugin.h
     src/PcaPlugin.cpp
     src/SettingsAction.h
@@ -79,17 +94,15 @@ set(AUX
     src/PcaPlugin.json
 )
 
-
-source_group(Plugin FILES ${SPH_PLUGIN_SOURCES})
-source_group(PCA FILES ${SPH_PLUGIN_SOURCES})
+source_group(Plugin FILES ${PLUGIN_SOURCES})
+source_group(PCA FILES ${PCA_HEADERS})
 source_group(Aux FILES ${AUX})
-
 
 # -----------------------------------------------------------------------------
 # CMake Target
 # -----------------------------------------------------------------------------
 
-add_library(${PCA_PLUGIN} SHARED ${PCA_PLUGIN_SOURCES} ${PCA_HEADERS} ${AUX})
+add_library(${PCA_PLUGIN} SHARED ${PLUGIN_SOURCES} ${PCA_HEADERS} ${AUX})
 
 qt_wrap_cpp(PCA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${PCA_PLUGIN})
 target_sources(${PCA_PLUGIN} PRIVATE ${PCA_MOC})
