@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 option(USE_OPENMP "Use OpenMP - by default ON" ON)
+option(USE_AVX "Use AVX if available - by default ON" OFF)
 
 # -----------------------------------------------------------------------------
 # Project: PCA plugin
@@ -13,7 +14,7 @@ PROJECT(${PCA_PLUGIN} C CXX)
 # Set cmake flags
 # -----------------------------------------------------------------------------
 
-# set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
@@ -24,8 +25,8 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-# use cmake hardware checks
-include(CheckCXXCompilerFlag)
+# Test hardware avx capabilities
+include(CMakeCheckSetAVX)
 
 # -----------------------------------------------------------------------------
 # Set install directory
@@ -121,31 +122,7 @@ if(MSVC)
 endif(MSVC)
 
 # Instruction sets
-if(MSVC)
-	set(AXV_CompileOption "/arch:AVX")
-	set(AXV2_CompileOption "/arch:AVX2")
-	set(SSE2_CompileOption "/arch:SSE2")
-else()
-	set(AXV_CompileOption "-DUSE_AVX")
-	set(AXV2_CompileOption "-DUSE_AVX2")
-	set(SSE2_CompileOption "-DUSE_SSE2")
-endif()
-
-if(NOT DEFINED COMPILER_OPT_AVX_SUPPORTED OR NOT DEFINED COMPILER_OPT_AVX2_SUPPORTED)
-	check_cxx_compiler_flag(${AXV_CompileOption} COMPILER_OPT_AVX_SUPPORTED)
-	check_cxx_compiler_flag(${AXV2_CompileOption} COMPILER_OPT_AVX2_SUPPORTED)
-endif()
-
-if(COMPILER_OPT_AVX2_SUPPORTED)
-	MESSAGE( STATUS "Use AXV2")
-	target_compile_options(${PCA_PLUGIN} PRIVATE ${AXV2_CompileOption})
-elseif(COMPILER_OPT_AVX_SUPPORTED)
-	MESSAGE( STATUS "Use AXV")
-	target_compile_options(${PCA_PLUGIN} PRIVATE ${AXV_CompileOption})
-else()
-	MESSAGE( STATUS "Use SSE2")
-	target_compile_options(${PCA_PLUGIN} PRIVATE ${SSE2_CompileOption})
-endif()
+check_and_set_AVX(${PCA_PLUGIN} ${USE_AVX})
 
 # Warning levels
 if(MSVC)
