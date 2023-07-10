@@ -24,5 +24,12 @@ SettingsAction::SettingsAction(QObject* parent) :
     _dataNormAction.initialize(QStringList({ "None", "Mean Norm", "Min-Max Norm"}), "None");
     _stdAxisOrientation.setChecked(true);
     _numberOfComponents.initialize(1, 2, 2);    // default: use 2 PCA components, max is set data-dependent in PcaPlugin.cpp 
+
+    addAction(&_pcaAlgorithmAction);
+    addAction(&_dataNormAction);
+    addAction(&_numberOfComponents);
+    addAction(&_stdAxisOrientation);
+    addAction(&_startAnalysisAction);
+    addAction(&_publishNewDataAction);
 }
 
