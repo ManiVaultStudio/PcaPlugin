@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.21)
 option(USE_OPENMP "Use OpenMP - by default ON" ON)
 option(USE_AVX "Use AVX if available - by default ON" OFF)
 
+set(INSTALL_DIR "" CACHE PATH "Specify install directory. If not set, try to use environment variable HDPS_INSTALL_DIR")
+
 # -----------------------------------------------------------------------------
 # Project: PCA plugin
 # -----------------------------------------------------------------------------
