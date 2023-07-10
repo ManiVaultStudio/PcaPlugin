@@ -15,7 +15,6 @@ PROJECT(${PCA_PLUGIN} C CXX)
 # -----------------------------------------------------------------------------
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 if(MSVC)
@@ -59,24 +58,41 @@ ENDIF()
 # Source files
 # -----------------------------------------------------------------------------
 
-set(SOURCES
+set(PCA_PLUGIN_SOURCES
     src/PcaPlugin.h
     src/PcaPlugin.cpp
     src/SettingsAction.h
     src/SettingsAction.cpp
-    src/PcaPlugin.json
-    src/PCA.h
     src/DimensionSelectionAction.h
     src/DimensionSelectionAction.cpp
 )
 
-source_group(Plugin FILES ${SOURCES})
+set(PLUGIN_MOC_HEADERS
+    src/PcaPlugin.h
+)
+
+set(PCA_HEADERS
+    src/PCA.h
+)
+
+set(AUX
+    src/PcaPlugin.json
+)
+
+
+source_group(Plugin FILES ${SPH_PLUGIN_SOURCES})
+source_group(PCA FILES ${SPH_PLUGIN_SOURCES})
+source_group(Aux FILES ${AUX})
+
 
 # -----------------------------------------------------------------------------
 # CMake Target
 # -----------------------------------------------------------------------------
 
-add_library(${PCA_PLUGIN} SHARED ${SOURCES})
+add_library(${PCA_PLUGIN} SHARED ${PCA_PLUGIN_SOURCES} ${PCA_HEADERS} ${AUX})
+
+qt_wrap_cpp(PCA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${PCA_PLUGIN})
+target_sources(${PCA_PLUGIN} PRIVATE ${PCA_MOC})
 
 # -----------------------------------------------------------------------------
 # Target include directories
