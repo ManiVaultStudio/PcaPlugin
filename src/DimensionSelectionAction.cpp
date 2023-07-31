@@ -4,6 +4,8 @@ DimensionSelectionAction::DimensionSelectionAction(QObject* parent) :
     GroupAction(parent, "DimensionSelectionAction"),
     _pickerAction(this, "DimensionPicker")
 {
-    setText("Dimensions");
+    setText("PCA Input Dimensions");
     setPopupSizeHint(QSize(400, 0));
+
+    addAction(&_pickerAction);
 }
