@@ -149,6 +149,7 @@ void PCAPlugin::init()
     initialData.resize(numPoints * numInitialDataDimensions);
     outputDataset->setData(initialData.data(), inputDataset->getNumPoints(), numInitialDataDimensions);
     events().notifyDatasetDataChanged(outputDataset);
+    events().notifyDatasetDataDimensionsChanged(outputDataset);
 
     if (numPoints > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
     {
@@ -257,6 +258,7 @@ void PCAPlugin::setPCADataInCore(hdps::Dataset<Points> coreDataset, const std::v
 {
     coreDataset->setData(data.data(), getInputDataset<Points>()->getNumPoints(), num_components);
     events().notifyDatasetDataChanged(coreDataset);
+    events().notifyDatasetDataDimensionsChanged(coreDataset);
 }
 
 void PCAPlugin::publishCopy()
