@@ -179,10 +179,12 @@ void PCAPlugin::computePCA()
     // Disable actions during analysis
     _settingsAction.getStartAnalysisAction().setEnabled(false);
 
+    auto& task = getOutputDataset()->getTask();
+
     // Set the task name and description
-    setTaskName("PCA");
-    setTaskRunning();
-    setTaskDescription("Computing...");
+    task.setName("PCA");
+    task.setRunning();
+    task.setDescription("Computing...");
 
     // Get data 
     std::vector<float> data;
@@ -211,11 +213,11 @@ void PCAPlugin::computePCA()
 
         // Flag the analysis task as finished
         if (pca_status == EXIT_SUCCESS)
-            setTaskFinished();
+            task.setFinished();
         else
         {
-            setTaskAborted();
-            setTaskDescription("Computation failed");
+            task.setAborted();
+            task.setProgressDescription("Computation failed");
         }
 
         _pcaWorker->deleteLater();
