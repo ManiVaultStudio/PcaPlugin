@@ -9,8 +9,8 @@
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
 
-using namespace hdps;
-using namespace hdps::plugin;
+using namespace mv;
+using namespace mv::plugin;
 
 /// ////////////////// ///
 /// SETTING CONVERSION ///
@@ -158,10 +158,10 @@ void PCAPlugin::init()
     }
 
     // Start the analysis when the user clicks the start analysis push button
-    connect(&_settingsAction.getStartAnalysisAction(), &hdps::gui::TriggerAction::triggered, this, &PCAPlugin::computePCA);
+    connect(&_settingsAction.getStartAnalysisAction(), &mv::gui::TriggerAction::triggered, this, &PCAPlugin::computePCA);
 
     // Publish a copy of the output data set
-    connect(&_settingsAction.getPublishNewDataAction(), &hdps::gui::TriggerAction::triggered, this, &PCAPlugin::publishCopy);
+    connect(&_settingsAction.getPublishNewDataAction(), &mv::gui::TriggerAction::triggered, this, &PCAPlugin::publishCopy);
 
     // Update dimension selection with new data
     connect(&inputDataset, &Dataset<Points>::dataChanged, this, [this, inputDataset]() {
@@ -238,7 +238,7 @@ void PCAPlugin::computePCA()
     emit startPCA();
 }
 
-void PCAPlugin::getDataFromCore(const hdps::Dataset<Points> coreDataset, std::vector<float>& data, std::vector<unsigned int>& dimensionIndices)
+void PCAPlugin::getDataFromCore(const mv::Dataset<Points> coreDataset, std::vector<float>& data, std::vector<unsigned int>& dimensionIndices)
 {
     // Extract the enabled dimensions from the data
     std::vector<bool> enabledDimensions = _dimensionSelectionAction.getPickerAction().getEnabledDimensions();
@@ -256,7 +256,7 @@ void PCAPlugin::getDataFromCore(const hdps::Dataset<Points> coreDataset, std::ve
     coreDataset->populateDataForDimensions<std::vector<float>, std::vector<unsigned int>>(data, dimensionIndices);
 }
 
-void PCAPlugin::setPCADataInCore(hdps::Dataset<Points> coreDataset, const std::vector<float>& data, size_t num_components)
+void PCAPlugin::setPCADataInCore(mv::Dataset<Points> coreDataset, const std::vector<float>& data, size_t num_components)
 {
     coreDataset->setData(data.data(), getInputDataset<Points>()->getNumPoints(), num_components);
     events().notifyDatasetDataChanged(coreDataset);
@@ -295,7 +295,7 @@ AnalysisPlugin* PCAPluginFactory::produce()
     return new PCAPlugin(this);
 }
 
-PluginTriggerActions PCAPluginFactory::getPluginTriggerActions(const hdps::Datasets& datasets) const
+PluginTriggerActions PCAPluginFactory::getPluginTriggerActions(const mv::Datasets& datasets) const
 {
     PluginTriggerActions pluginTriggerActions;
 

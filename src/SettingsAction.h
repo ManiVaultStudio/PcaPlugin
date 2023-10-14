@@ -3,7 +3,7 @@
 #include "actions/Actions.h"
 
 /** All GUI related classes are in the HDPS Graphical User Interface namespace */
-using namespace hdps::gui;
+using namespace mv::gui;
 
 /**
  * PCASettingsAction class
