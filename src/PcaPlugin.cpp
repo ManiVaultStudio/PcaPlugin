@@ -13,7 +13,7 @@ using namespace mv::plugin;
 /// SETTING CONVERSION ///
 /// ////////////////// ///
 
-math::PCA_ALG getPcaAlgorithm(size_t index) {
+static math::PCA_ALG getPcaAlgorithm(size_t index) {
     math::PCA_ALG alg = math::PCA_ALG::COV;
 
     switch (index)
@@ -29,7 +29,7 @@ math::PCA_ALG getPcaAlgorithm(size_t index) {
     return alg;
 }
 
-std::ostream& operator<<(std::ostream& o, math::PCA_ALG alg)
+static std::ostream& operator<<(std::ostream& o, math::PCA_ALG alg)
 {
 
     if(alg == math::PCA_ALG::COV)
@@ -40,7 +40,7 @@ std::ostream& operator<<(std::ostream& o, math::PCA_ALG alg)
     return o;
 }
 
-math::DATA_NORM getDataNorm(size_t index) {
+static math::DATA_NORM getDataNorm(size_t index) {
     math::DATA_NORM norm = math::DATA_NORM::NONE;
 
     switch (index)
@@ -60,7 +60,7 @@ math::DATA_NORM getDataNorm(size_t index) {
 
 }
 
-std::ostream& operator<<(std::ostream& o, math::DATA_NORM norm)
+static std::ostream& operator<<(std::ostream& o, math::DATA_NORM norm)
 {
 
     if (norm == math::DATA_NORM::NONE)
@@ -142,8 +142,8 @@ void PCAPlugin::init()
 
     // Set initial data (default 2 dimensions, all points at (0,0) )
     std::vector<float> initialData;
-    const auto numInitialDataDimensions = 2;
-    initialData.resize(numPoints * numInitialDataDimensions);
+    const size_t numInitialDataDimensions = 2;
+    initialData.resize(numInitialDataDimensions * numPoints);
     outputDataset->setData(initialData.data(), inputDataset->getNumPoints(), numInitialDataDimensions);
     events().notifyDatasetDataChanged(outputDataset);
     events().notifyDatasetDataDimensionsChanged(outputDataset);

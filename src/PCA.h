@@ -46,7 +46,7 @@ namespace math {
     template<class T>
     inline std::vector<T> convertEigenMatrixToStdVector(Eigen::Matrix<T, -1, -1> mat, bool followStorageOrder = true) {
 
-        const Eigen::StorageOptions StorageOrder = mat.IsRowMajor ? Eigen::RowMajor : Eigen::ColMajor;
+        Eigen::StorageOptions StorageOrder = mat.IsRowMajor ? Eigen::RowMajor : Eigen::ColMajor;
 
         // by default Eigen uses column-major storage order
         if (StorageOrder == Eigen::ColMajor)
@@ -62,7 +62,6 @@ namespace math {
         const size_t num_row = data_in.size() / num_dims;
         const size_t num_col = num_dims;
 
-        // omp on visual studio can only handle signed integers
         if (num_row > static_cast<size_t>(std::numeric_limits<int32_t>::max()))
             std::cerr << "PCA::convertStdVectorToEigenMatrix can only handle data with up to std::numeric_limits<uint32_t>::max() points" << std::endl;
 
