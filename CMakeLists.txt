@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 option(USE_OPENMP "Use OpenMP - by default ON" ON)
 option(USE_AVX "Use AVX if available - by default ON" OFF)
+option(PCA_UNIT_TESTS "Create unit tests - by default OFF" OFF)
 
 set(INSTALL_DIR "" CACHE PATH "Specify install directory. If not set, try to use environment variable HDPS_INSTALL_DIR")
 
@@ -172,11 +173,7 @@ endif()
 # -----------------------------------------------------------------------------
 # Unit testing
 # -----------------------------------------------------------------------------
-if(NOT UNIT_TESTS)
-    set(UNIT_TESTS FALSE CACHE BOOL "Create unit tests")
-endif()
-
-if(${UNIT_TESTS})
+if(${PCA_UNIT_TESTS})
 	MESSAGE( STATUS "Activate unit tests")
 	add_subdirectory("test")
 endif()
