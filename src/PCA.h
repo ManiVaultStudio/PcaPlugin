@@ -11,9 +11,9 @@
 	
 #include <cassert>
 
-#pragma warning(disable: 4068)
-#include "Eigen/Dense"
-#pragma warning(default: 4068)
+#include <Eigen/Core> 
+#include <Eigen/Eigenvalues> 
+#include <Eigen/SVD> 
 
 namespace utils {
 
