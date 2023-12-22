@@ -1,6 +1,10 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include "actions/GroupAction.h"
+#include "actions/OptionAction.h"
+#include "actions/IntegralAction.h"
+#include "actions/ToggleAction.h"
+#include "actions/TriggerAction.h"
 
 /** All GUI related classes are in the HDPS Graphical User Interface namespace */
 using namespace mv::gui;

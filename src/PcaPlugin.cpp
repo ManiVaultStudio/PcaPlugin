@@ -1,11 +1,8 @@
 #include "PcaPlugin.h"
 
-#include "PointData/PointData.h"
 #include "PCA.h"
 
-#include <actions/PluginTriggerAction.h>
-
-#include <QtCore>
+#include <PointData/PointData.h>
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
 

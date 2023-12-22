@@ -1,20 +1,16 @@
 #pragma once
 
+#include <actions/PluginTriggerAction.h>
 #include <AnalysisPlugin.h>
 
-#include "SettingsAction.h"
 #include "DimensionSelectionAction.h"
+#include "SettingsAction.h"
 
 #include <tuple>
 
-#include <QThread>
 #include <QPointer>
+#include <QThread>
 
-/** All plugin related classes are in the HDPS plugin namespace */
-using namespace mv::plugin;
-
-/** Vector classes used in this plugin are in the HDPS namespace */
-using namespace mv;
 
 namespace math {
     enum class PCA_ALG;
@@ -54,7 +50,7 @@ private:
 /// ////////// ///
 /// PCA PLUGIN ///
 /// ////////// ///
-class PCAPlugin : public AnalysisPlugin
+class PCAPlugin : public mv::plugin::AnalysisPlugin
 {
 Q_OBJECT
 
@@ -64,7 +60,7 @@ public:
      * Constructor
      * @param factory Pointer to the plugin factory
      */
-    PCAPlugin(const PluginFactory* factory);
+    PCAPlugin(const mv::plugin::PluginFactory* factory);
 
     /** Destructor */
     ~PCAPlugin() override = default;
@@ -92,7 +88,7 @@ private:
 /// ////////////// ///
 /// PLUGIN FACTORY ///
 /// ////////////// ///
-class PCAPluginFactory : public AnalysisPluginFactory
+class PCAPluginFactory : public mv::plugin::AnalysisPluginFactory
 {
     Q_INTERFACES(mv::plugin::AnalysisPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
@@ -111,12 +107,12 @@ public:
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /** Creates an instance of the example analysis plugin */
-    AnalysisPlugin* produce() override;
+    mv::plugin::AnalysisPlugin* produce() override;
 
     /**
      * Get plugin trigger actions given \p datasets
      * @param datasets Vector of input datasets
      * @return Vector of plugin trigger actions
      */
-    PluginTriggerActions getPluginTriggerActions(const mv::Datasets& datasets) const override;
+    mv::gui::PluginTriggerActions getPluginTriggerActions(const mv::Datasets& datasets) const override;
 };

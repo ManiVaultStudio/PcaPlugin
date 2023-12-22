@@ -2,18 +2,14 @@
 #define PCA_H
 
 #include <chrono>
-#include <vector>
-#include <string>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <stdexcept>
-#include <cstdlib>
+#include <string>
+#include <vector>
 	
 #include <cassert>
-
-#ifdef _OPENMP 
-#include <omp.h>
-#endif
 
 #pragma warning(disable: 4068)
 #include "Eigen/Dense"
