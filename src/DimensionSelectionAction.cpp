@@ -4,8 +4,6 @@ DimensionSelectionAction::DimensionSelectionAction(QObject* parent) :
     GroupAction(parent, "DimensionSelectionAction"),
     _pickerAction(this, "DimensionPicker")
 {
-    qDebug() << "DimensionSelectionAction::DimensionSelectionAction";
-
     setText("PCA Input Dimensions");
     setSerializationName("DimensionSelectionAction");
 
@@ -16,8 +14,6 @@ DimensionSelectionAction::DimensionSelectionAction(QObject* parent) :
 
 void DimensionSelectionAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    qDebug() << "DimensionSelectionAction::fromVariantMap";
-
     GroupAction::fromVariantMap(variantMap);
 
     _pickerAction.fromParentVariantMap(variantMap);
@@ -25,8 +21,6 @@ void DimensionSelectionAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DimensionSelectionAction::toVariantMap() const
 {
-    qDebug() << "DimensionSelectionAction::toVariantMap";
-
     QVariantMap variantMap = GroupAction::toVariantMap();
 
     _pickerAction.insertIntoVariantMap(variantMap);

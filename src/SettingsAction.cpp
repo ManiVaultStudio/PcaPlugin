@@ -9,8 +9,6 @@ SettingsAction::SettingsAction(QObject* parent) :
     _startAnalysisAction(this, "Start analysis"),
     _publishNewDataAction(this, "Copy to new data set")
 {
-    qDebug() << "SettingsAction::SettingsAction";
-
     setText("PCA");
     setSerializationName("PcaSettings");
 
@@ -38,8 +36,6 @@ SettingsAction::SettingsAction(QObject* parent) :
 
 void SettingsAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    qDebug() << "SettingsAction::fromVariantMap";
-
     GroupAction::fromVariantMap(variantMap);
 
     _pcaAlgorithmAction.fromParentVariantMap(variantMap);
@@ -52,8 +48,6 @@ void SettingsAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap SettingsAction::toVariantMap() const
 {
-    qDebug() << "SettingsAction::toVariantMap";
-
     QVariantMap variantMap = GroupAction::toVariantMap();
 
     _pcaAlgorithmAction.insertIntoVariantMap(variantMap);
