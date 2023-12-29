@@ -2,6 +2,7 @@
 
 #include "PCA.h"
 
+#include "PointData/InfoAction.h"
 #include <PointData/PointData.h>
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
@@ -110,22 +111,23 @@ PCAPlugin::PCAPlugin(const PluginFactory* factory) :
     _pcaWorker(nullptr),
     _workerThread()
 {
+    setSerializationName("PCAPlugin");
 }
 
 void PCAPlugin::init()
 {
-    // Create example output dataset (a points dataset which is derived from the input points dataset) and set the output dataset
-    setOutputDataset(mv::data().createDerivedDataset("PCA", getInputDataset(), getInputDataset()));
+    // Create output dataset (a points dataset which is derived from the input points dataset) and set the output dataset
+    if (!outputDataInit())
+    {
+        qDebug() << "PCAPlugin::create new derived data";
+        setOutputDataset(mv::data().createDerivedDataset("PCA", getInputDataset(), getInputDataset()));
+    }
 
-    // Retrieve the input dataset for our specific data type (in our case points)
-    // The HDPS core sets the input dataset reference when the plugin is created
     const auto inputDataset = getInputDataset<Points>();
+    auto outputDataset = getOutputDataset<Points>();
 
     // Set maximum number of PCA components in GUI
     _settingsAction.getNumberOfComponents().setMaximum(inputDataset->getNumDimensions());
-
-    // Retrieve the output dataset for our specific data type (in our case points)
-    auto outputDataset = getOutputDataset<Points>();
 
     // Inject the settings action in the output points dataset 
     // By doing so, the settings user interface will be accessible though the data properties widget
@@ -137,6 +139,7 @@ void PCAPlugin::init()
 
     // Automatically focus on the PCA action
     outputDataset->getDataHierarchyItem().select();
+    outputDataset->_infoAction->collapse();
 
     const auto numPoints = inputDataset->getNumPoints();
 
@@ -276,6 +279,27 @@ void PCAPlugin::publishCopy()
     setPCADataInCore(copyDataset, data, dimensionIndices.size());
 }
 
+void PCAPlugin::fromVariantMap(const QVariantMap& variantMap)
+{
+    AnalysisPlugin::fromVariantMap(variantMap);
+
+    mv::util::variantMapMustContain(variantMap, "PcaSettings");
+    mv::util::variantMapMustContain(variantMap, "DimensionSelectionAction");
+
+    _settingsAction.fromParentVariantMap(variantMap);
+    _dimensionSelectionAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap PCAPlugin::toVariantMap() const
+{
+    QVariantMap variantMap = AnalysisPlugin::toVariantMap();
+
+    _settingsAction.insertIntoVariantMap(variantMap);
+    _dimensionSelectionAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
+
 /// ////////////// ///
 /// PLUGIN FACTORY ///
 /// ////////////// ///
@@ -301,7 +325,7 @@ PluginTriggerActions PCAPluginFactory::getPluginTriggerActions(const mv::Dataset
 
     if (PluginFactory::areAllDatasetsOfTheSameType(datasets, PointType)) {
         if (datasets.count() >= 1) {
-            auto pluginTriggerAction = new PluginTriggerAction(const_cast<PCAPluginFactory*>(this), this, "PCA", "Perform a principle component analysis on the selected datasets", getIcon(), [this, getPluginInstance, datasets](PluginTriggerAction& pluginTriggerAction) -> void {
+            auto pluginTriggerAction = new PluginTriggerAction(const_cast<PCAPluginFactory*>(this), this, "PCA", "Perform a principle component analysis on the selected datasets", getIcon(), [this, getPluginInstance, datasets]([[maybe_unused]] PluginTriggerAction& pluginTriggerAction) -> void {
                 for (auto dataset : datasets)
                     getPluginInstance(dataset);
                 });

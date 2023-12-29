@@ -71,6 +71,20 @@ public:
 signals:
     void startPCA();
 
+public: // Serialization
+
+    /**
+     * Load plugin from variant map
+     * @param Variant map representation of the plugin
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save plugin to variant map
+     * @return Variant map representation of the plugin
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
     void computePCA();
     void getDataFromCore(const mv::Dataset<Points> coreDataset, std::vector<float>& data, std::vector<unsigned int>& indices);

@@ -25,6 +25,20 @@ public: // Action getters
 
     DimensionsPickerAction& getPickerAction() { return _pickerAction; };
 
-protected:
+public: // Serialization
+
+    /**
+     * Load plugin from variant map
+     * @param Variant map representation of the plugin
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save plugin to variant map
+     * @return Variant map representation of the plugin
+     */
+    QVariantMap toVariantMap() const override;
+
+private:
     DimensionsPickerAction  _pickerAction;    /** Dimension picker action */
 };
