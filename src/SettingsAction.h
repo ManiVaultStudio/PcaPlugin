@@ -10,7 +10,7 @@
 using namespace mv::gui;
 
 /**
- * PCASettingsAction class
+ * SettingsAction class
  * 
  */
 class SettingsAction : public GroupAction
