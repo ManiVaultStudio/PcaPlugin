@@ -115,7 +115,7 @@ PCAPlugin::PCAPlugin(const PluginFactory* factory) :
 void PCAPlugin::init()
 {
     // Create example output dataset (a points dataset which is derived from the input points dataset) and set the output dataset
-    setOutputDataset(_core->createDerivedDataset("PCA", getInputDataset(), getInputDataset()));
+    setOutputDataset(mv::data().createDerivedDataset("PCA", getInputDataset(), getInputDataset()));
 
     // Retrieve the input dataset for our specific data type (in our case points)
     // The HDPS core sets the input dataset reference when the plugin is created
@@ -265,8 +265,7 @@ void PCAPlugin::publishCopy()
     std::cout << "PCA Plugin: Publish a copy of the output dataset." << std::endl;
 
     // Create new data set
-    auto copyDataset = _core->addDataset("Points", "PCA (copy)", getInputDataset());
-    events().notifyDatasetAdded(copyDataset);
+    auto copyDataset = mv::data().createDataset("Points", "PCA (copy)", getInputDataset());
 
     // Get data 
     std::vector<float> data;
