@@ -85,6 +85,9 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+    /** Whether the analysis plugin implements serialization */
+    bool implementsSerialization() const override { return true; }
+
 private:
     void computePCA();
     void getDataFromCore(const mv::Dataset<Points> coreDataset, std::vector<float>& data, std::vector<unsigned int>& indices);
