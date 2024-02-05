@@ -221,6 +221,10 @@ void PCAPlugin::computePCA()
 
         _pcaWorker->deleteLater();
 
+        _workerThread.quit();           // Signal the thread to quit gracefully
+        if (!_workerThread.wait(500))   // Wait for the thread to actually finish
+            _workerThread.terminate();  // Terminate thread after 0.5 seconds
+
         // Enabled action again
         _settingsAction.getStartAnalysisAction().setEnabled(true);
 
