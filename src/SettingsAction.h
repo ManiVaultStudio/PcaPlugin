@@ -1,8 +1,8 @@
 #pragma once
 
 #include "actions/GroupAction.h"
-#include "actions/OptionAction.h"
 #include "actions/IntegralAction.h"
+#include "actions/OptionAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/TriggerAction.h"
 
@@ -10,7 +10,7 @@
 using namespace mv::gui;
 
 /**
- * PCASettingsAction class
+ * SettingsAction class
  * 
  */
 class SettingsAction : public GroupAction
@@ -31,6 +31,20 @@ public: // Action getters
     ToggleAction& getStdAxisOrientation() { return _stdAxisOrientation; }
     TriggerAction& getStartAnalysisAction() { return _startAnalysisAction; }
     TriggerAction& getPublishNewDataAction() { return _publishNewDataAction; }
+
+public: // Serialization
+
+    /**
+     * Load plugin from variant map
+     * @param Variant map representation of the plugin
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save plugin to variant map
+     * @return Variant map representation of the plugin
+     */
+    QVariantMap toVariantMap() const override;
 
 public:
     OptionAction    _pcaAlgorithmAction;            /** PCA algorithm action */

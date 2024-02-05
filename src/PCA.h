@@ -44,7 +44,7 @@ namespace math {
     /// ////////// ///
 
     template<class T>
-    inline std::vector<T> convertEigenMatrixToStdVector(Eigen::Matrix<T, -1, -1> mat, bool followStorageOrder = true) {
+    inline std::vector<T> convertEigenMatrixToStdVector(Eigen::Matrix<T, -1, -1> mat) {
 
         Eigen::StorageOptions StorageOrder = mat.IsRowMajor ? Eigen::RowMajor : Eigen::ColMajor;
 

@@ -2,6 +2,7 @@
 
 #include "PCA.h"
 
+#include <PointData/InfoAction.h>
 #include <PointData/PointData.h>
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
@@ -33,9 +34,9 @@ static std::ostream& operator<<(std::ostream& o, math::PCA_ALG alg)
 {
 
     if(alg == math::PCA_ALG::COV)
-        return o << "COV";;
+        return o << "COV";
     if (alg == math::PCA_ALG::SVD)
-        return o << "SVD";;
+        return o << "SVD";
 
     return o;
 }
@@ -64,11 +65,11 @@ static std::ostream& operator<<(std::ostream& o, math::DATA_NORM norm)
 {
 
     if (norm == math::DATA_NORM::NONE)
-        return o << "NONE";;
+        return o << "NONE";
     if (norm == math::DATA_NORM::MEAN)
-        return o << "MEAN";;
+        return o << "MEAN";
     if (norm == math::DATA_NORM::MINMAX)
-        return o << "MINMAX";;
+        return o << "MINMAX";
 
     return o;
 }
@@ -110,25 +111,35 @@ PCAPlugin::PCAPlugin(const PluginFactory* factory) :
     _pcaWorker(nullptr),
     _workerThread()
 {
+    setSerializationName("PCAPlugin");
 }
 
 void PCAPlugin::init()
 {
-    // Create example output dataset (a points dataset which is derived from the input points dataset) and set the output dataset
-    setOutputDataset(mv::data().createDerivedDataset("PCA", getInputDataset(), getInputDataset()));
-
-    // Retrieve the input dataset for our specific data type (in our case points)
-    // The HDPS core sets the input dataset reference when the plugin is created
     const auto inputDataset = getInputDataset<Points>();
+
+    // Create output dataset (a points dataset which is derived from the input points dataset) and set the output dataset
+    if (!outputDataInit())
+    {
+        qDebug() << "PCAPlugin::create new derived data";
+        auto newOutput = Dataset<Points>(mv::data().createDerivedDataset("PCA", inputDataset, inputDataset));
+        setOutputDataset(newOutput);
+
+        // Set initial data (default 2 dimensions, all points at (0,0) )
+        std::vector<float> initialData;
+        const size_t numInitialDataDimensions = 2;
+        const auto numPoints = inputDataset->getNumPoints();
+        initialData.resize(numInitialDataDimensions * numPoints);
+        newOutput->setData(initialData.data(), numPoints, numInitialDataDimensions);
+        events().notifyDatasetDataChanged(newOutput);
+    }
+
+    auto outputDataset = getOutputDataset<Points>();
 
     // Set maximum number of PCA components in GUI
     _settingsAction.getNumberOfComponents().setMaximum(inputDataset->getNumDimensions());
 
-    // Retrieve the output dataset for our specific data type (in our case points)
-    auto outputDataset = getOutputDataset<Points>();
-
-    // Inject the settings action in the output points dataset 
-    // By doing so, the settings user interface will be accessible though the data properties widget
+    // Add the settings action to the output dataset GUI
     outputDataset->addAction(_settingsAction);
     outputDataset->addAction(_dimensionSelectionAction);
     
@@ -137,18 +148,9 @@ void PCAPlugin::init()
 
     // Automatically focus on the PCA action
     outputDataset->getDataHierarchyItem().select();
-
-    const auto numPoints = inputDataset->getNumPoints();
-
-    // Set initial data (default 2 dimensions, all points at (0,0) )
-    std::vector<float> initialData;
-    const size_t numInitialDataDimensions = 2;
-    initialData.resize(numInitialDataDimensions * numPoints);
-    outputDataset->setData(initialData.data(), inputDataset->getNumPoints(), numInitialDataDimensions);
-    events().notifyDatasetDataChanged(outputDataset);
-    events().notifyDatasetDataDimensionsChanged(outputDataset);
-
-    if (numPoints > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
+    outputDataset->_infoAction->collapse();
+    
+    if (inputDataset->getNumPoints() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
     {
         std::cerr << "PCA: can only handle data with up to std::numeric_limits<uint32_t>::max() points" << std::endl;
         _settingsAction.getStartAnalysisAction().setDisabled(true);
@@ -219,6 +221,10 @@ void PCAPlugin::computePCA()
 
         _pcaWorker->deleteLater();
 
+        _workerThread.quit();           // Signal the thread to quit gracefully
+        if (!_workerThread.wait(500))   // Wait for the thread to actually finish
+            _workerThread.terminate();  // Terminate thread after 0.5 seconds
+
         // Enabled action again
         _settingsAction.getStartAnalysisAction().setEnabled(true);
 
@@ -257,7 +263,6 @@ void PCAPlugin::setPCADataInCore(mv::Dataset<Points> coreDataset, const std::vec
 {
     coreDataset->setData(data.data(), getInputDataset<Points>()->getNumPoints(), num_components);
     events().notifyDatasetDataChanged(coreDataset);
-    events().notifyDatasetDataDimensionsChanged(coreDataset);
 }
 
 void PCAPlugin::publishCopy()
@@ -274,6 +279,27 @@ void PCAPlugin::publishCopy()
 
     // Set data
     setPCADataInCore(copyDataset, data, dimensionIndices.size());
+}
+
+void PCAPlugin::fromVariantMap(const QVariantMap& variantMap)
+{
+    AnalysisPlugin::fromVariantMap(variantMap);
+
+    mv::util::variantMapMustContain(variantMap, "PcaSettings");
+    mv::util::variantMapMustContain(variantMap, "DimensionSelectionAction");
+
+    _settingsAction.fromParentVariantMap(variantMap);
+    _dimensionSelectionAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap PCAPlugin::toVariantMap() const
+{
+    QVariantMap variantMap = AnalysisPlugin::toVariantMap();
+
+    _settingsAction.insertIntoVariantMap(variantMap);
+    _dimensionSelectionAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
 }
 
 /// ////////////// ///
@@ -301,8 +327,8 @@ PluginTriggerActions PCAPluginFactory::getPluginTriggerActions(const mv::Dataset
 
     if (PluginFactory::areAllDatasetsOfTheSameType(datasets, PointType)) {
         if (datasets.count() >= 1) {
-            auto pluginTriggerAction = new PluginTriggerAction(const_cast<PCAPluginFactory*>(this), this, "PCA", "Perform a principle component analysis on the selected datasets", getIcon(), [this, getPluginInstance, datasets](PluginTriggerAction& pluginTriggerAction) -> void {
-                for (auto dataset : datasets)
+            auto pluginTriggerAction = new PluginTriggerAction(const_cast<PCAPluginFactory*>(this), this, "PCA", "Perform a principle component analysis on the selected datasets", getIcon(), [this, getPluginInstance, datasets]([[maybe_unused]] PluginTriggerAction& pluginTriggerAction) -> void {
+                for (const auto& dataset : datasets)
                     getPluginInstance(dataset);
                 });
 

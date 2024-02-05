@@ -10,6 +10,7 @@ SettingsAction::SettingsAction(QObject* parent) :
     _publishNewDataAction(this, "Copy to new data set")
 {
     setText("PCA");
+    setSerializationName("PcaSettings");
 
     _pcaAlgorithmAction.setToolTip("Type of PCA algorithm");
     _dataNormAction.setToolTip("Type data normalization");
@@ -33,3 +34,28 @@ SettingsAction::SettingsAction(QObject* parent) :
     addAction(&_publishNewDataAction);
 }
 
+void SettingsAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    GroupAction::fromVariantMap(variantMap);
+
+    _pcaAlgorithmAction.fromParentVariantMap(variantMap);
+    _dataNormAction.fromParentVariantMap(variantMap);
+    _numberOfComponents.fromParentVariantMap(variantMap);
+    _stdAxisOrientation.fromParentVariantMap(variantMap);
+    _startAnalysisAction.fromParentVariantMap(variantMap);
+    _publishNewDataAction.fromParentVariantMap(variantMap);
+}
+
+QVariantMap SettingsAction::toVariantMap() const
+{
+    QVariantMap variantMap = GroupAction::toVariantMap();
+
+    _pcaAlgorithmAction.insertIntoVariantMap(variantMap);
+    _dataNormAction.insertIntoVariantMap(variantMap);
+    _numberOfComponents.insertIntoVariantMap(variantMap);
+    _stdAxisOrientation.insertIntoVariantMap(variantMap);
+    _startAnalysisAction.insertIntoVariantMap(variantMap);
+    _publishNewDataAction.insertIntoVariantMap(variantMap);
+
+    return variantMap;
+}
