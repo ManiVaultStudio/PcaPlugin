@@ -116,6 +116,9 @@ class PcaPluginConan(ConanFile):
         # Give the installation directory to CMake
         tc.variables["MV_INSTALL_DIR"] = self.install_dir
         
+        # Set some build options
+        tc.variables["MV_UNITY_BUILD"] = "ON"
+        
         tc.generate()
 
     def _configure_cmake(self):
