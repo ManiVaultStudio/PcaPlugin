@@ -3,8 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 option(USE_OPENMP "Use OpenMP - by default ON" ON)
 option(USE_AVX "Use AVX if available - by default ON" OFF)
 option(PCA_UNIT_TESTS "Create unit tests - by default OFF" OFF)
-
-set(INSTALL_DIR "" CACHE PATH "Specify install directory. If not set, try to use environment variable HDPS_INSTALL_DIR")
+option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
 
 # -----------------------------------------------------------------------------
 # Project: PCA plugin
@@ -87,17 +86,12 @@ source_group(Aux FILES ${AUX})
 # -----------------------------------------------------------------------------
 # CMake Target
 # -----------------------------------------------------------------------------
-
 add_library(${PCA_PLUGIN} SHARED ${PLUGIN_SOURCES} ${PCA_HEADERS} ${AUX})
-
-qt_wrap_cpp(PCA_MOC ${PLUGIN_MOC_HEADERS} TARGET ${PCA_PLUGIN})
-target_sources(${PCA_PLUGIN} PRIVATE ${PCA_MOC})
 
 # -----------------------------------------------------------------------------
 # Target include directories
 # -----------------------------------------------------------------------------
 
-# Include HDPS core headers
 target_include_directories(${PCA_PLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 target_include_directories(${PCA_PLUGIN} PRIVATE ${Eigen3_DIR})
 
@@ -144,6 +138,11 @@ if(MSVC)
   target_compile_options(${PCA_PLUGIN} PRIVATE /W3)
 else()
   target_compile_options(${PCA_PLUGIN} PRIVATE -Wall)
+endif()
+
+# unity/jumbo build
+if(MV_UNITY_BUILD)
+    set_target_properties(${PCA_PLUGIN} PROPERTIES UNITY_BUILD ON)
 endif()
 
 # -----------------------------------------------------------------------------
