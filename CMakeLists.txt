@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
-option(USE_OPENMP "Use OpenMP - by default ON" ON)
-option(USE_AVX "Use AVX if available - by default ON" OFF)
-option(PCA_UNIT_TESTS "Create unit tests - by default OFF" OFF)
+option(MV_PCA_USE_OPENMP "Use OpenMP - by default ON" ON)
+option(MV_PCA_USE_AVX "Use AVX if available - by default ON" OFF)
+option(MV_PCA_UNIT_TESTS "Create unit tests - by default OFF" OFF)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
 
 # -----------------------------------------------------------------------------
@@ -97,8 +97,8 @@ target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${PCA_PLUGIN} PRIVATE ManiVault::Core)
 target_link_libraries(${PCA_PLUGIN} PRIVATE ManiVault::PointData)
 
-if(USE_OPENMP AND OpenMP_CXX_FOUND)
-	message(STATUS "Link to OpenMP")
+if(${MV_PCA_USE_OPENMP} AND OpenMP_CXX_FOUND)
+	message(STATUS "Link ${PCA_PLUGIN} to OpenMP")
 	target_link_libraries(${PCA_PLUGIN} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
@@ -115,7 +115,7 @@ if(MSVC)
 endif(MSVC)
 
 # Instruction sets
-check_and_set_AVX(${PCA_PLUGIN} ${USE_AVX})
+check_and_set_AVX(${PCA_PLUGIN} ${MV_PCA_USE_AVX})
 
 # Warning levels
 if(MSVC)
@@ -156,7 +156,7 @@ endif()
 # -----------------------------------------------------------------------------
 # Unit testing
 # -----------------------------------------------------------------------------
-if(${PCA_UNIT_TESTS})
+if(${MV_PCA_UNIT_TESTS})
 	MESSAGE( STATUS "Activate unit tests")
 	add_subdirectory("test")
 endif()

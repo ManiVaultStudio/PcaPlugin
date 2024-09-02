@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
 
-option(USE_OPENMP "Use OpenMP - by default ON" ON)
-
 # -----------------------------------------------------------------------------
 # Project: PCA plugin testing
 # -----------------------------------------------------------------------------
@@ -97,8 +95,8 @@ target_include_directories(${PCA_TESTS} PRIVATE ${Eigen3_DIR})
 target_link_libraries(${PCA_TESTS} PRIVATE Catch2::Catch2WithMain)
 target_link_libraries(${PCA_TESTS} PRIVATE nlohmann_json::nlohmann_json)
 
-if(USE_OPENMP AND OpenMP_CXX_FOUND)
-	message(STATUS "Link to OpenMP")
+if(${MV_PCA_USE_OPENMP} AND OpenMP_CXX_FOUND)
+	message(STATUS "Link ${PCA_TESTS} to OpenMP")
 	target_link_libraries(${PCA_TESTS} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
