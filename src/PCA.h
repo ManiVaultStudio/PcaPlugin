@@ -73,7 +73,7 @@ namespace math {
         // copy data from vector to matrix
 #ifndef NDEBUG
 #pragma omp parallel for
-#endif NDEBUG
+#endif // NDEBUG
         // loop over data points
         for(int32_t point = 0; point < static_cast<int32_t>(num_row); point++)
         {
@@ -146,7 +146,7 @@ namespace math {
 
 #ifndef NDEBUG
 #pragma omp parallel for
-#endif NDEBUG
+#endif // NDEBUG
             for (int32_t row = 0; row < static_cast<int32_t>(num_row); row++)
             {
                 mat(row, col) /= normFacs[col];
