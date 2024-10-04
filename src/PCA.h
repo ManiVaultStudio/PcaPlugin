@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -336,4 +337,4 @@ namespace math {
 
 }
 
-#endif PCA_H
+#endif // PCA_H
