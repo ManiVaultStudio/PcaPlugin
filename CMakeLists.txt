@@ -38,13 +38,17 @@ find_package(OpenMP)
 
 find_package(ManiVault COMPONENTS Core PointData CONFIG)
 
-set(Eigen3_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/eigen")
-
-IF(EXISTS "${Eigen3_DIR}/CMakeLists.txt")
-    MESSAGE(STATUS "Eigen3 found at ${Eigen3_DIR}")
-ELSE()
-	MESSAGE(FATAL_ERROR "Eigen3 not found")
-ENDIF()
+include(FetchContent)
+set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
+set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
+FetchContent_Declare(
+    Eigen3
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen
+    GIT_TAG 9df21dc8b4b576a7aa5c0094daa8d7e8b8be60f0
+    GIT_SHALLOW TRUE
+    FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(Eigen3)
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -85,7 +89,6 @@ add_library(${PCA_PLUGIN} SHARED ${PLUGIN_SOURCES} ${PCA_HEADERS} ${AUX})
 # -----------------------------------------------------------------------------
 
 target_include_directories(${PCA_PLUGIN} PRIVATE "${ManiVault_INCLUDE_DIR}")
-target_include_directories(${PCA_PLUGIN} PRIVATE ${Eigen3_DIR})
 
 # -----------------------------------------------------------------------------
 # Target library linking
@@ -96,6 +99,7 @@ target_link_libraries(${PCA_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 
 target_link_libraries(${PCA_PLUGIN} PRIVATE ManiVault::Core)
 target_link_libraries(${PCA_PLUGIN} PRIVATE ManiVault::PointData)
+target_link_libraries(${PCA_PLUGIN} PRIVATE Eigen3::Eigen)
 
 if(${MV_PCA_USE_OPENMP} AND OpenMP_CXX_FOUND)
 	message(STATUS "Link ${PCA_PLUGIN} to OpenMP")

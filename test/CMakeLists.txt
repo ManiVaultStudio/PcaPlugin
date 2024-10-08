@@ -28,38 +28,40 @@ endif(MSVC)
 
 find_package(OpenMP)
 
-set(PCA_PLUGIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+include(FetchContent)
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2
+    GIT_TAG v3.7.1
+    GIT_SHALLOW TRUE
+    FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(Catch2)
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG v3.11.3
+    GIT_SHALLOW TRUE
+    FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(nlohmann_json)
 
-# EIGEN3
-set(Eigen3_DIR "${PCA_PLUGIN_DIR}/third_party/eigen")
+find_package(Catch2 CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
-IF( EXISTS "${Eigen3_DIR}/CMakeLists.txt" )
-    MESSAGE( STATUS "Eigen3 found at ${Eigen3_DIR}")
-ELSE()
-	MESSAGE( FATAL_ERROR "Eigen3 not found")
-ENDIF()
-
-# CATCH2
-if(DEFINED ENV{CATCH2_DIR})
-    set(CATCH2_DIR $ENV{CATCH2_DIR} CACHE PATH  "Path to Catch2")
+if(NOT ${Eigen3_FOUND})
+    set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
+    set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
+    FetchContent_Declare(
+        Eigen3
+        GIT_REPOSITORY https://gitlab.com/libeigen/eigen
+        GIT_TAG 9df21dc8b4b576a7aa5c0094daa8d7e8b8be60f0
+        GIT_SHALLOW TRUE
+        FIND_PACKAGE_ARGS
+    )
+    FetchContent_MakeAvailable(Eigen3)
+    find_package(Eigen3 CONFIG REQUIRED)
 endif()
-
-find_package(Catch2 3 REQUIRED PATHS ${CATCH2_DIR})
-
-IF( ${Catch2_FOUND} )
-    MESSAGE( STATUS "Catch2 found at ${Catch2_DIR}")
-ENDIF()
-
-# JSON
-if(DEFINED ENV{nlohmann_json_DIR})
-    set(nlohmann_json_DIR $ENV{nlohmann_json_DIR} CACHE PATH  "Path to nlohmann_json")
-endif()
-
-find_package(nlohmann_json 3.2.0 REQUIRED PATHS ${nlohmann_json_DIR})
-
-IF( ${NLOHMANN_JSON_FOUND} )
-    MESSAGE( STATUS "NLOHMANN_JSON found at ${nlohmann_json_DIR}")
-ENDIF()
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -83,6 +85,7 @@ add_executable(${PCA_TESTS} ${SOURCES})
 # -----------------------------------------------------------------------------
 
 # Include pca 
+set(PCA_PLUGIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 target_include_directories(${PCA_TESTS} PRIVATE "${PCA_PLUGIN_DIR}/src")
 
 # Include eigen headers 
@@ -94,6 +97,7 @@ target_include_directories(${PCA_TESTS} PRIVATE ${Eigen3_DIR})
 # linking against catch will add the proper include path
 target_link_libraries(${PCA_TESTS} PRIVATE Catch2::Catch2WithMain)
 target_link_libraries(${PCA_TESTS} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${PCA_TESTS} PRIVATE Eigen3::Eigen)
 
 if(${MV_PCA_USE_OPENMP} AND OpenMP_CXX_FOUND)
 	message(STATUS "Link ${PCA_TESTS} to OpenMP")
