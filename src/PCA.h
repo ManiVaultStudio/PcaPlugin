@@ -1,20 +1,20 @@
 #ifndef PCA_H
 #define PCA_H
 
+#include <cassert>
 #include <chrono>
-#include <cstdlib>
+#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <numeric>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
-	
-#include <cassert>
 
-#include <Eigen/Core> 
-#include <Eigen/Eigenvalues> 
-#include <Eigen/SVD> 
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
+#include <Eigen/SVD>
 
 namespace utils {
 
@@ -40,6 +40,21 @@ namespace utils {
 
 namespace math {
 
+    /// //////// ///
+    /// SETTINGS ///
+    /// //////// ///
+
+    enum class DATA_NORM {
+        NONE,      // no norm 
+        MEAN,      // meanNormalization
+        MINMAX,    // minMaxNormalization, map each column to [0,1]
+    };
+
+    enum class PCA_ALG {
+        SVD,    // Use singular value decomposition, Eigen::BDCSVD
+        COV,    // Compute eigenvalues of covariance matrix of data, Eigen::SelfAdjointEigenSolver
+    };
+
     /// ////////// ///
     /// CONVERSION ///
     /// ////////// ///
@@ -47,10 +62,10 @@ namespace math {
     template<class T>
     inline std::vector<T> convertEigenMatrixToStdVector(Eigen::Matrix<T, -1, -1> mat) {
 
-        Eigen::StorageOptions StorageOrder = mat.IsRowMajor ? Eigen::RowMajor : Eigen::ColMajor;
+        const Eigen::StorageOptions StorageOrder = mat.IsRowMajor ? Eigen::RowMajor : Eigen::ColMajor;
 
         // by default Eigen uses column-major storage order
-        if (StorageOrder == Eigen::ColMajor)
+        if constexpr (StorageOrder == Eigen::ColMajor)
         {
             mat.transposeInPlace();
         }
@@ -60,11 +75,11 @@ namespace math {
 
     Eigen::MatrixXf convertStdVectorToEigenMatrix(const std::vector<float>& data_in, const size_t num_dims)
     {
-        const size_t num_row = data_in.size() / num_dims;
-        const size_t num_col = num_dims;
+        const int64_t num_row = data_in.size() / num_dims;
+        const int64_t num_col = num_dims;
 
-        if (num_row > static_cast<size_t>(std::numeric_limits<int32_t>::max()))
-            std::cerr << "PCA::convertStdVectorToEigenMatrix can only handle data with up to std::numeric_limits<uint32_t>::max() points" << std::endl;
+        if (num_row > std::numeric_limits<int64_t>::max())
+            std::cerr << "PCA::convertStdVectorToEigenMatrix can only handle data with up to std::numeric_limits<int64_t>::max() points" << std::endl;
 
         // convert std vector to Eigen MatrixXf
         // each row in MatrixXf corresponds to one data point
@@ -75,11 +90,11 @@ namespace math {
 #pragma omp parallel for
 #endif // NDEBUG
         // loop over data points
-        for(int32_t point = 0; point < static_cast<int32_t>(num_row); point++)
+        for (int64_t point = 0; point < static_cast<int64_t>(num_row); point++)
         {
             // loop over data point values
-            for (size_t dim = 0; dim < num_col; dim++)
-                data(point, dim) = data_in[point* num_dims + dim];
+            for (int64_t dim = 0; dim < num_col; dim++)
+                data(point, dim) = data_in[point * num_dims + dim];
         }
 
         // this would be more concise but only works if data_in is not const
@@ -197,12 +212,12 @@ namespace math {
     {
         if (num_comp > std::min(num_row, num_col))
         {
-            std::cout << "pca: num_comp must be smaller than min(num_row, num_col). Setting num_comp = min(num_row, num_col)";
+            std::cout << "pca: num_comp must be smaller than min(num_row, num_col). Setting num_comp = min(num_row, num_col)" << std::endl;
             num_comp = std::min(num_row, num_col);
         }
         else if (num_comp <= 0)
         {
-            std::cout << "pca: num_comp must larger than 0. Setting num_comp = min(num_row, num_col)";
+            std::cout << "pca: num_comp must larger than 0. Setting num_comp = min(num_row, num_col)" << std::endl;
             num_comp = std::min(num_row, num_col);
         }
     }
@@ -222,7 +237,7 @@ namespace math {
     // data should be have column-wise zero empirical mean 
     inline Eigen::MatrixXf pcaCovMat(const Eigen::MatrixXf& data, const size_t num_comp) 
     {
-        // covaraince matrix
+        // covariance matrix
         Eigen::MatrixXf covMat = data.transpose() * data;
 
         // covariance matrices are symmetric, so use appropriate solver
@@ -251,26 +266,15 @@ namespace math {
         return data * principal_components;
     }
 
-    enum class DATA_NORM {
-        NONE,      // no norm 
-        MEAN,      // meanNormalization
-        MINMAX,    // minMaxNormalization, map each column to [0,1]
-    };
-
-    enum class PCA_ALG {
-        SVD,    // Use singular value decomposition, Eigen::BDCSVD
-        COV,    // Compute eigenvalues of covariance matrix of data, Eigen::SelfAdjointEigenSolver
-    };
-
-    inline int32_t pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, const PCA_ALG algorithm = PCA_ALG::SVD, const DATA_NORM norm = DATA_NORM::MINMAX, const bool stdOrientation = true)
+    inline bool pca(const std::vector<float>& data_in, const size_t num_dims, std::vector<float>& pca_out, size_t& num_comp, const PCA_ALG algorithm = PCA_ALG::SVD, const DATA_NORM norm = DATA_NORM::MINMAX, const bool stdOrientation = true)
     {
         // do not transform if data is 1d
         if (num_dims <= 1)
         {
             num_comp = num_dims;
             pca_out = data_in;
-            std::cout << "pca: num_dims == 1, no transformation is performed";
-            return EXIT_FAILURE;
+            std::cout << "pca: num_dims == 1, no transformation is performed" << std::endl;;
+            return false;
         }
 
         // convert std vector to Eigen MatrixXf
@@ -315,9 +319,9 @@ namespace math {
             principal_components = pca_alg(data_normed);
         }
         catch (const std::runtime_error& ex) {
-            std::cerr << "PCA could not be computed: " << ex.what() << std::endl;
+            std::cout << "PCA could not be computed: " << ex.what() << std::endl;
             pca_out = std::vector(data.rows() * num_comp, 0.0f);
-            return EXIT_FAILURE;
+            return false;
         }
 
         // project data, compute pca components and
@@ -330,10 +334,9 @@ namespace math {
         // convert to std vector with [p0d0, p0d1, ..., p1d0, p1d1, ..., pNd0, pNd1, ..., pNdM]
         pca_out = convertEigenMatrixToStdVector(data_transformed);
 
-        return EXIT_SUCCESS;
+        return true;
 
     }
-
 
 }
 
