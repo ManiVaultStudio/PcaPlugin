@@ -5,6 +5,8 @@
 #include <PointData/InfoAction.h>
 #include <PointData/PointData.h>
 
+#include <algorithm>
+
 Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
 
 using namespace mv;
@@ -205,7 +207,7 @@ void PCAPlugin::computePCA()
 
     // get results from PCA
     connect(_pcaWorker, &PCAWorker::resultReady, this, [&](int32_t pca_status) {
-        auto [pca_out, num_comps] = _pcaWorker->getRestuls();
+        auto [pca_out, num_comps] = _pcaWorker->getResults();
 
         // Publish pca to core
         setPCADataInCore(getOutputDataset<Points>(), pca_out, num_comps);
@@ -245,9 +247,9 @@ void PCAPlugin::getDataFromCore(const mv::Dataset<Points> coreDataset, std::vect
 {
     // Extract the enabled dimensions from the data
     std::vector<bool> enabledDimensions = _dimensionSelectionAction.getPickerAction().getEnabledDimensions();
-    const auto numEnabledDimensions = count_if(enabledDimensions.begin(), enabledDimensions.end(), [](bool b) { return b; });
+    const auto numEnabledDimensions = std::count_if(enabledDimensions.begin(), enabledDimensions.end(), [](bool b) { return b; });
 
-    // resize outout data
+    // resize output data
     data.resize((coreDataset->isFull() ? coreDataset->getNumPoints() : coreDataset->indices.size()) * numEnabledDimensions);
 
     // populate dimensionIndices

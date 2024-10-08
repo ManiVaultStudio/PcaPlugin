@@ -5,14 +5,16 @@
 <p align="middle">
   <img src="https://github.com/ManiVaultStudio/PcaPlugin/assets/58806453/91310fdd-641c-44b4-855b-8c3fea814eb1" align="middle" width="20%" />
   <img src="https://github.com/ManiVaultStudio/PcaPlugin/assets/58806453/b22676ca-9e2b-4932-87da-ef2d7f3efc67" align="middle" width="51%" /> </br>
-  Settings UI (left) and several PCA components of MNIST (right: 1&2, 3&4, 5&6)
+  Settings UI (left) and several PCA components of <a href="https://yann.lecun.com/exdb/mnist/">MNIST</a> (right: 1&2, 3&4, 5&6)
 </p>
 <!-- PCA and t-SNE screenshot: 58806453/f9f19920-f1a4-41be-9ce4-ff8239aa6c3b -->
 
-Clone the repo with it's submodule (Eigen 3.4):
+Clone the repo: 
 ```
-git clone --recurse-submodule https://github.com/ManiVaultStudio/PcaPlugin.git
+git clone https://github.com/ManiVaultStudio/PcaPlugin.git
 ```
+[Eigen](https://gitlab.com/libeigen/eigen) is automatically downloaded during the cmake configuration. 
+
 
 ## Settings
 - Preprocessing:

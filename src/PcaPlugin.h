@@ -6,11 +6,13 @@
 #include "DimensionSelectionAction.h"
 #include "SettingsAction.h"
 
+#include <cstdint>
+#include <memory>
 #include <tuple>
+#include <vector>
 
 #include <QPointer>
 #include <QThread>
-
 
 namespace math {
     enum class PCA_ALG;
@@ -28,7 +30,7 @@ class PCAWorker : public QObject
 public:
     PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, size_t num_comps, math::PCA_ALG algorithm, math::DATA_NORM norm, bool std_orient);
 
-    std::tuple<std::vector<float>&, size_t> getRestuls() { return { _pca_out, _num_comps }; }
+    std::tuple<std::vector<float>&, size_t> getResults() { return { _pca_out, _num_comps }; }
 
 signals:
     void resultReady(int32_t pca_status);
