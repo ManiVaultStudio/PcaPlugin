@@ -119,7 +119,7 @@ if(MSVC)
 endif(MSVC)
 
 # Instruction sets
-check_and_set_AVX(${PCA_PLUGIN} ${MV_PCA_USE_AVX})
+mv_check_and_set_AVX(${PCA_PLUGIN} ${MV_PCA_USE_AVX})
 
 # Warning levels
 if(MSVC)
