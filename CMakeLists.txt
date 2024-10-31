@@ -15,7 +15,6 @@ PROJECT(${PCA_PLUGIN} C CXX)
 # -----------------------------------------------------------------------------
 # Set cmake flags
 # -----------------------------------------------------------------------------
-
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_AUTOMOC ON)
 
@@ -25,9 +24,6 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
-
-# Test hardware avx capabilities
-include(CMakeCheckSetAVX)
 
 # -----------------------------------------------------------------------------
 # Dependencies
@@ -119,7 +115,7 @@ if(MSVC)
 endif(MSVC)
 
 # Instruction sets
-check_and_set_AVX(${PCA_PLUGIN} ${MV_PCA_USE_AVX})
+mv_check_and_set_AVX(${PCA_PLUGIN} ${MV_PCA_USE_AVX})
 
 # Warning levels
 if(MSVC)
