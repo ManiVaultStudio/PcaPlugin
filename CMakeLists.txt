@@ -40,8 +40,7 @@ set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORC
 FetchContent_Declare(
     Eigen3
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen
-    GIT_TAG 3.4
-    GIT_SHALLOW TRUE
+    GIT_TAG e67c494cba7180066e73b9f6234d0b2129f1cdf5
     FIND_PACKAGE_ARGS
 )
 FetchContent_MakeAvailable(Eigen3)
