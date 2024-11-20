@@ -73,7 +73,7 @@ namespace math {
         return { mat.data(), mat.data() + mat.size() };
     }
 
-    Eigen::MatrixXf convertStdVectorToEigenMatrix(const std::vector<float>& data_in, const size_t num_dims)
+    inline Eigen::MatrixXf convertStdVectorToEigenMatrix(const std::vector<float>& data_in, const size_t num_dims)
     {
         const int64_t num_row = data_in.size() / num_dims;
         const int64_t num_col = num_dims;
