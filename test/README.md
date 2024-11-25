@@ -1,5 +1,5 @@
 # PCA Plugin Test
-Run `create_reference_data.py` to create reference data sets and reference PCA transformations before performing the tests.
+Run `python create_reference_data.py` in this directory to create reference data sets and reference PCA transformations before performing the tests.
 
 The reference values are created in python using [scikit-learn](https://scikit-learn.org) and [numpy](https://numpy.org/).
 
