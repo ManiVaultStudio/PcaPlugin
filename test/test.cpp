@@ -15,7 +15,7 @@
 using namespace testing;
 
 const std::filesystem::path current_file_path = std::source_location::current().file_name();
-const std::filesystem::path dataDir = current_file_path.parent_path() / "data" / "";
+const std::filesystem::path dataDir = current_file_path.parent_path() / "data";
 
 /// Sklearn example data
 /// Test with the example data from the sklearn documentation for their PCA implementation
