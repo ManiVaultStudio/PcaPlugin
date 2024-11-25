@@ -6,8 +6,10 @@
 #include <PointData/PointData.h>
 
 #include <algorithm>
+#include <iostream>
+#include <ostream>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
+Q_PLUGIN_METADATA(IID "studio.manivault.PCAPlugin")
 
 using namespace mv;
 using namespace mv::plugin;
@@ -91,14 +93,15 @@ PCAWorker::PCAWorker(std::shared_ptr<std::vector<float>> data, size_t num_dims, 
 }
 
 void PCAWorker::compute() {
-    int32_t pca_status = 0;
+    bool pca_success = false;
+
     utils::timer([&]() {
-        pca_status = math::pca(*_data, /* number of dimension = */ _num_dims, /* transformed PCA data = */ _pca_out, /* number of pca components = */ _num_comps,
+        pca_success = math::pca(*_data, /* number of dimension = */ _num_dims, /* transformed PCA data = */ _pca_out, /* number of pca components = */ _num_comps,
                                        /* pca algorithm = */ _algorithm, /* data normalization = */ _norm, /* stdOrientation = */ _std_orient);
         },
         "PCA computation time (ms)");
 
-    emit resultReady(pca_status);
+    emit resultReady(pca_success);
 }
 
 
@@ -206,14 +209,14 @@ void PCAPlugin::computePCA()
     connect(this, &PCAPlugin::startPCA, _pcaWorker, &PCAWorker::compute);               
 
     // get results from PCA
-    connect(_pcaWorker, &PCAWorker::resultReady, this, [&](int32_t pca_status) {
+    connect(_pcaWorker, &PCAWorker::resultReady, this, [&](bool pca_success) {
         auto [pca_out, num_comps] = _pcaWorker->getResults();
 
         // Publish pca to core
         setPCADataInCore(getOutputDataset<Points>(), pca_out, num_comps);
 
         // Flag the analysis task as finished
-        if (pca_status == EXIT_SUCCESS)
+        if (pca_success == true)
             task.setFinished();
         else
         {

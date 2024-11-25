@@ -90,14 +90,14 @@ namespace testing {
 	/// FILE IO ///
 	/// /////// ///
 
-	[[nodiscard]] int readBinaryToStdVector(const std::string& fileName, std::vector<float>& data)
+	[[nodiscard]] bool readBinaryToStdVector(const std::string& fileName, std::vector<float>& data)
 	{
 		std::ifstream fin(fileName, std::ios::in | std::ios::binary);
 	
 		// check if files exists
 		if (!fin.is_open()) {
 			std::cout << "Unable to load file: " << fileName << std::endl;
-			return EXIT_FAILURE;
+			return false;
 		}
 
 		// number of data points
@@ -112,7 +112,7 @@ namespace testing {
 		fin.read(reinterpret_cast<char*>(data.data()), fileSize);
 		fin.close();
 
-		return EXIT_SUCCESS;
+		return true;
 	}
 
 }

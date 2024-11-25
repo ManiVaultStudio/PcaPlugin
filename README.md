@@ -27,4 +27,4 @@ git clone https://github.com/ManiVaultStudio/PcaPlugin.git
   - Defaults to two
 
 ## Testing
-You can perform unit tests. Set the cmake variable UNIT_TESTS to build tests. To build the testing project, you'll need to install some further dependencies and create ground truth data; see `test/README.md`.
+You can perform unit tests. Set the cmake variable `MV_PCA_UNIT_TESTS` to build tests. To build the testing project, you'll need to install some further dependencies and create ground truth data; see `test/README.md`.
