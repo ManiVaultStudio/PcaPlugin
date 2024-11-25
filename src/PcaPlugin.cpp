@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-Q_PLUGIN_METADATA(IID "nl.BioVault.PCAPlugin")
+Q_PLUGIN_METADATA(IID "studio.manivault.PCAPlugin")
 
 using namespace mv;
 using namespace mv::plugin;

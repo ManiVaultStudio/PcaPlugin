@@ -108,7 +108,7 @@ class PCAPluginFactory : public mv::plugin::AnalysisPluginFactory
 {
     Q_INTERFACES(mv::plugin::AnalysisPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.BioVault.PCAPlugin"
+    Q_PLUGIN_METADATA(IID   "studio.manivault.PCAPlugin"
                       FILE  "PcaPlugin.json")
 
 public:
