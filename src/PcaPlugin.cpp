@@ -311,7 +311,10 @@ QVariantMap PCAPlugin::toVariantMap() const
 /// PLUGIN FACTORY ///
 /// ////////////// ///
 
-
+PCAPluginFactory::PCAPluginFactory()
+{
+    setIconByName("braille");
+}
 
 AnalysisPlugin* PCAPluginFactory::produce()
 {
