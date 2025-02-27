@@ -114,7 +114,7 @@ class PCAPluginFactory : public mv::plugin::AnalysisPluginFactory
 public:
 
     /** Default constructor */
-    PCAPluginFactory() {}
+    PCAPluginFactory();
 
     /** Destructor */
     ~PCAPluginFactory() override {}
