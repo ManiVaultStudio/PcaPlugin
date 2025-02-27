@@ -119,9 +119,6 @@ public:
     /** Destructor */
     ~PCAPluginFactory() override {}
 
-    /** Returns the plugin icon */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
     /** Creates an instance of the example analysis plugin */
     mv::plugin::AnalysisPlugin* produce() override;
 
