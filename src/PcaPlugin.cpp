@@ -311,10 +311,7 @@ QVariantMap PCAPlugin::toVariantMap() const
 /// PLUGIN FACTORY ///
 /// ////////////// ///
 
-QIcon PCAPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
-{
-    return Application::getIconFont("FontAwesome").getIcon("braille");
-}
+
 
 AnalysisPlugin* PCAPluginFactory::produce()
 {
