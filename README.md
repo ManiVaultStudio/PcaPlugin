@@ -1,4 +1,4 @@
-# PCA Plugin  [![Actions Status](https://github.com/ManiVaultStudio/ParallelCoordinatesPlugin/workflows/ParallelCoordinatesPlugin/badge.svg?branch=master)](https://github.com/ManiVaultStudio/ParallelCoordinatesPlugin/actions)
+# PCA Plugin  [![Actions Status](https://github.com/ManiVaultStudio/PcaPlugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ManiVaultStudio/PcaPlugin/actions)
 
 [Principal components analysis](https://en.wikipedia.org/wiki/Principal_component_analysis) plugin for the [ManiVault](https://github.com/ManiVaultStudio/core) visual analytics framework.
 
