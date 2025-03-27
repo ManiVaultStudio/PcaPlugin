@@ -41,11 +41,13 @@ endif()
 
 include(FetchContent)
 set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
+set(EIGEN_BUILD_TESTING  OFF CACHE BOOL "Enable creation of Eigen tests." FORCE)
 set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
+set(EIGEN_BUILD_DEMOS OFF CACHE BOOL "Toggles the building of the Eigen demos" FORCE)
 FetchContent_Declare(
     Eigen3
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen
-    GIT_TAG e67c494cba7180066e73b9f6234d0b2129f1cdf5
+    GIT_TAG 3866cbfbe8622f41b4f9fa17227aaa7a8de13890
     FIND_PACKAGE_ARGS
 )
 FetchContent_MakeAvailable(Eigen3)
