@@ -26,6 +26,9 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
+# wrapper for cmake fetch utils
+include(CMakeFetchUtils)
+
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
@@ -40,18 +43,11 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 if(NOT eigen_SOURCE_DIR AND NOT TARGET Eigen3::Eigen AND NOT Eigen3_FOUND)
-    include(FetchContent)
     set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
     set(EIGEN_BUILD_TESTING  OFF CACHE BOOL "Enable creation of Eigen tests." FORCE)
     set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
     set(EIGEN_BUILD_DEMOS OFF CACHE BOOL "Toggles the building of the Eigen demos" FORCE)
-    FetchContent_Declare(
-        eigen
-        GIT_REPOSITORY https://gitlab.com/libeigen/eigen
-        GIT_TAG 3866cbfbe8622f41b4f9fa17227aaa7a8de13890
-        FIND_PACKAGE_ARGS
-    )
-    FetchContent_MakeAvailable(eigen)
+    fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/3866cbfbe8622f41b4f9fa17227aaa7a8de13890/eigen-3866cbfbe8622f41b4f9fa17227aaa7a8de13890.tar.gz") # master as of 26/03/25
 endif()
 
 # -----------------------------------------------------------------------------
