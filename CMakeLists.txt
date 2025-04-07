@@ -5,6 +5,7 @@ option(MV_PCA_USE_AVX "Use AVX if available - by default ON" OFF)
 option(MV_PCA_UNIT_TESTS "Create unit tests - by default OFF" OFF)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
 
+# Set DOWNLOAD_EXTRACT_TIMESTAMP option to the time of the extraction, added in 3.24
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
