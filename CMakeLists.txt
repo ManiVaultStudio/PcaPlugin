@@ -144,6 +144,7 @@ add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
 	COMMAND "${CMAKE_COMMAND}"
 	--install ${CMAKE_CURRENT_BINARY_DIR}
 	--config $<CONFIGURATION>
+	--component PLUGIN
 	--prefix ${ManiVault_INSTALL_DIR}/$<CONFIGURATION>
 )
 
