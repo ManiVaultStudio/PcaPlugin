@@ -137,8 +137,8 @@ endif()
 # Target installation
 # -----------------------------------------------------------------------------
 install(TARGETS ${PCA_PLUGIN}
-    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
-    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
+    RUNTIME DESTINATION Plugins COMPONENT PLUGIN # Windows .dll
+    LIBRARY DESTINATION Plugins COMPONENT PLUGIN # Linux/Mac .so
 )
 
 add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
