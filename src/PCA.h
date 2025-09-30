@@ -226,7 +226,7 @@ namespace math {
     inline Eigen::MatrixXf pcaSVD(const Eigen::MatrixXf& data, const size_t num_comp)
     {
         // compute svd
-        Eigen::BDCSVD<Eigen::MatrixXf> svd(data, Eigen::ComputeThinV);
+        Eigen::BDCSVD<Eigen::MatrixXf, Eigen::ComputeThinV> svd(data);
 
         if(svd.info() != Eigen::Success)
             throw (std::runtime_error("pcaSVD failed. Eigen::ComputationInfo " + std::to_string(static_cast<int32_t>(svd.info()))));
