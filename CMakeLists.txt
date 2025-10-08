@@ -52,7 +52,7 @@ if(NOT eigen_SOURCE_DIR AND NOT TARGET Eigen3::Eigen AND NOT Eigen3_FOUND)
     set(EIGEN_BUILD_TESTING  OFF CACHE BOOL "Enable creation of Eigen tests." FORCE)
     set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
     set(EIGEN_BUILD_DEMOS OFF CACHE BOOL "Toggles the building of the Eigen demos" FORCE)
-    fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/3866cbfbe8622f41b4f9fa17227aaa7a8de13890/eigen-3866cbfbe8622f41b4f9fa17227aaa7a8de13890.tar.gz") # master as of 26/03/25
+    fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/5.0.0.tar.gz")
 endif()
 
 # -----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ set(PCA_HEADERS
 )
 
 set(AUX
-    src/PcaPlugin.json
+    PluginInfo.json
 )
 
 source_group(Plugin FILES ${PLUGIN_SOURCES})
@@ -110,7 +110,7 @@ endif()
 # Target properties
 # -----------------------------------------------------------------------------
 
-# Request C++17
+# Request C++20
 target_compile_features(${PCA_PLUGIN} PRIVATE cxx_std_20)
 target_compile_features(${PCA_PLUGIN} PRIVATE c_std_17)
 
@@ -149,10 +149,7 @@ add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
 	--prefix ${ManiVault_INSTALL_DIR}/$<CONFIGURATION>
 )
 
-set_target_properties(${PCA_PLUGIN}
-    PROPERTIES
-    FOLDER AnalysisPlugins
-)
+mv_handle_plugin_config(${PCA_PLUGIN})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
