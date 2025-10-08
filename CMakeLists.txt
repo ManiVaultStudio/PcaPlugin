@@ -110,7 +110,7 @@ endif()
 # Target properties
 # -----------------------------------------------------------------------------
 
-# Request C++17
+# Request C++20
 target_compile_features(${PCA_PLUGIN} PRIVATE cxx_std_20)
 target_compile_features(${PCA_PLUGIN} PRIVATE c_std_17)
 
