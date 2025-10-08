@@ -73,7 +73,7 @@ set(PCA_HEADERS
 )
 
 set(AUX
-    src/PcaPlugin.json
+    PluginInfo.json
 )
 
 source_group(Plugin FILES ${PLUGIN_SOURCES})
@@ -149,10 +149,7 @@ add_custom_command(TARGET ${PCA_PLUGIN} POST_BUILD
 	--prefix ${ManiVault_INSTALL_DIR}/$<CONFIGURATION>
 )
 
-set_target_properties(${PCA_PLUGIN}
-    PROPERTIES
-    FOLDER AnalysisPlugins
-)
+mv_handle_plugin_config(${PCA_PLUGIN})
 
 # -----------------------------------------------------------------------------
 # Miscellaneous
