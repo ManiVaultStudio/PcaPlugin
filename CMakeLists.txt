@@ -47,12 +47,13 @@ if(OpenMP_CXX_FOUND)
     message(STATUS "Found OpenMP")
 endif()
 
+find_package(Eigen3 CONFIG)
 if(NOT eigen_SOURCE_DIR AND NOT TARGET Eigen3::Eigen AND NOT Eigen3_FOUND)
     set(BUILD_TESTING OFF CACHE BOOL "Enable testing for Eigen" FORCE)
     set(EIGEN_BUILD_TESTING  OFF CACHE BOOL "Enable creation of Eigen tests." FORCE)
     set(EIGEN_BUILD_DOC OFF CACHE BOOL "Enable creation of Eigen documentation" FORCE)
     set(EIGEN_BUILD_DEMOS OFF CACHE BOOL "Toggles the building of the Eigen demos" FORCE)
-    fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/5.0.0.tar.gz")
+    fetch_content_url(eigen "https://gitlab.com/libeigen/eigen/-/archive/5.0.1.tar.gz")
 endif()
 
 # -----------------------------------------------------------------------------
