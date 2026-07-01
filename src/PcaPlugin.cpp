@@ -2,6 +2,8 @@
 
 #include "PCA.h"
 
+#include <util/Serialization.h>
+
 #include <PointData/InfoAction.h>
 #include <PointData/PointData.h>
 
