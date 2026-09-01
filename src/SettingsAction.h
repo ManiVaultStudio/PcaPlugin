@@ -6,7 +6,6 @@
 #include "actions/ToggleAction.h"
 #include "actions/TriggerAction.h"
 
-/** All GUI related classes are in the HDPS Graphical User Interface namespace */
 using namespace mv::gui;
 
 /**
